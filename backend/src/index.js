@@ -14,21 +14,29 @@ const initSocket = require('./socket');
 const app = express();
 const server = http.createServer(app);
 
+function buildAllowedOrigins() {
+  const origins = new Set([
+    process.env.FRONTEND_CUSTOMER_URL,
+    process.env.FRONTEND_KITCHEN_URL,
+    ...(process.env.FRONTEND_URLS ? process.env.FRONTEND_URLS.split(',') : []),
+    'http://localhost:5173',
+    'http://localhost:5174',
+  ].filter(Boolean).map((origin) => origin.trim()));
+
+  return [...origins];
+}
+
+const allowedOrigins = buildAllowedOrigins();
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      process.env.FRONTEND_CUSTOMER_URL || 'http://localhost:5173',
-      process.env.FRONTEND_KITCHEN_URL || 'http://localhost:5174',
-    ],
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
   },
 });
 
 app.use(cors({
-  origin: [
-    process.env.FRONTEND_CUSTOMER_URL || 'http://localhost:5173',
-    process.env.FRONTEND_KITCHEN_URL || 'http://localhost:5174',
-  ],
+  origin: allowedOrigins,
 }));
 app.use(express.json());
 

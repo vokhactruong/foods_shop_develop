@@ -5,7 +5,8 @@ export function useKitchenSocket({ onNewOrder, onOrderUpdated }) {
   const socketRef = useRef(null);
 
   useEffect(() => {
-    const socket = io('/', { path: '/socket.io' });
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || '/';
+    const socket = io(socketUrl, { path: '/socket.io' });
     socketRef.current = socket;
 
     socket.on('connect', () => {

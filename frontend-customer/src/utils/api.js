@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const api = axios.create({ baseURL: '/api' });
+const apiBaseURL = import.meta.env.VITE_API_URL || '/api';
+const api = axios.create({ baseURL: apiBaseURL.replace(/\/$/, '') });
 
 export const getMenu = (category) =>
   api.get('/menu', { params: category !== 'all' ? { category } : {} }).then((r) => r.data);
