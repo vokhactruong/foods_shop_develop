@@ -1,0 +1,29 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #1A1A1A;
+  color: #F5F0EB;
+  min-height: 100vh;
+}
+
+:root {
+  --primary: #D85A30;
+  --bg-dark: #1A1A1A;
+  --bg-card: #252525;
+  --bg-card2: #2E2E2E;
+  --border: rgba(255,255,255,0.1);
+  --text: #F5F0EB;
+  --text-muted: #888;
+  --new: #E24B4A;
+  --doing: #EF9F27;
+  --done: #639922;
+  --radius: 12px;
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea, select { font-family: inherit; }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }

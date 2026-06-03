@@ -1,0 +1,26 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', sans-serif;
+  background: #FDF6F0;
+  color: #2C1A0E;
+  min-height: 100dvh;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+:root {
+  --primary: #D85A30;
+  --primary-dark: #B8441E;
+  --primary-light: #FAECE7;
+  --text: #2C1A0E;
+  --text-muted: #8B6E5A;
+  --bg: #FDF6F0;
+  --bg-card: #FFFFFF;
+  --border: rgba(0,0,0,0.08);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+button { font-family: inherit; cursor: pointer; }
+input, textarea { font-family: inherit; }

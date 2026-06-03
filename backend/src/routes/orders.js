@@ -1,0 +1,208 @@
+const router = require('express').Router();
+const Order = require('../models/Order');
+const MenuItem = require('../models/MenuItem');
+const auth = require('../middleware/auth');
+
+const PAID_STATUSES = ['paid'];
+
+// POST /api/orders — khách tạo đơn
+router.post('/', async (req, res) => {
+  try {
+    const { tableNumber, items, note } = req.body;
+
+    if (!tableNumber || !items || !items.length)
+      return res.status(400).json({ message: 'Thiếu thông tin đơn hàng' });
+
+    // Validate và tính giá từ DB
+    const enrichedItems = [];
+    let totalAmount = 0;
+
+    for (const item of items) {
+      const menuItem = await MenuItem.findById(item.menuItemId);
+      if (!menuItem || !menuItem.available)
+        return res.status(400).json({ message: `Món "${item.name}" không còn phục vụ` });
+
+      const subtotal = menuItem.price * item.quantity;
+      totalAmount += subtotal;
+      enrichedItems.push({
+        menuItem: menuItem._id,
+        name: menuItem.name,
+        price: menuItem.price,
+        quantity: item.quantity,
+        subtotal,
+      });
+    }
+
+    const order = await Order.create({
+      tableNumber,
+      items: enrichedItems,
+      totalAmount,
+      note: note || '',
+      statusHistory: [{ status: 'new' }],
+    });
+
+    // Emit real-time tới màn hình bếp
+    req.io.to('kitchen').emit('new_order', order);
+
+    res.status(201).json(order);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/orders — bếp/admin xem đơn
+router.get('/', auth, async (req, res) => {
+  try {
+    const { status, date } = req.query;
+    const filter = {};
+    if (status && status !== 'all') filter.status = status;
+    if (date) {
+      const start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(date);
+      end.setHours(23, 59, 59, 999);
+      filter.createdAt = { $gte: start, $lte: end };
+    } else {
+      // Mặc định xem đơn hôm nay
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      filter.createdAt = { $gte: today };
+    }
+    const orders = await Order.find(filter).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// PUT /api/orders/:id/status — bếp cập nhật trạng thái
+router.put('/:id/status', auth, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const validStatuses = ['new', 'doing', 'done', 'served', 'paid', 'cancelled'];
+    if (!validStatuses.includes(status))
+      return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ message: 'Không tìm thấy đơn' });
+
+    order.status = status;
+    await order.save();
+
+    // Broadcast cập nhật
+    req.io.emit('order_updated', order);
+
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET /api/orders/stats — thống kê doanh thu
+router.get('/stats', auth, async (req, res) => {
+  try {
+    const { range = 'today', startDate, endDate } = req.query;
+    const end = endDate ? new Date(endDate) : new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const start = startDate ? new Date(startDate) : new Date(end);
+    if (!startDate && range === '7d') start.setDate(start.getDate() - 6);
+    if (!startDate && range === '30d') start.setDate(start.getDate() - 29);
+    start.setHours(0, 0, 0, 0);
+
+    const dateFilter = { createdAt: { $gte: start, $lte: end } };
+    const revenueFilter = { ...dateFilter, status: { $in: PAID_STATUSES } };
+
+    const monthlyStart = new Date(end.getFullYear(), end.getMonth() - 11, 1);
+    monthlyStart.setHours(0, 0, 0, 0);
+
+    const [todayOrders, totalRevenue, statusBreakdown, revenueByDay, revenueByMonth, topItems, recentOrders] = await Promise.all([
+      Order.countDocuments({ ...dateFilter, status: { $ne: 'cancelled' } }),
+      Order.aggregate([
+        { $match: revenueFilter },
+        { $group: { _id: null, total: { $sum: '$totalAmount' }, paidOrders: { $sum: 1 } } },
+      ]),
+      Order.aggregate([
+        { $match: dateFilter },
+        { $group: { _id: '$status', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      Order.aggregate([
+        { $match: revenueFilter },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+            revenue: { $sum: '$totalAmount' },
+            orders: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+      Order.aggregate([
+        {
+          $match: {
+            status: { $in: PAID_STATUSES },
+            createdAt: { $gte: monthlyStart, $lte: end },
+          },
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
+            revenue: { $sum: '$totalAmount' },
+            orders: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+      Order.aggregate([
+        { $match: revenueFilter },
+        { $unwind: '$items' },
+        {
+          $group: {
+            _id: '$items.name',
+            quantity: { $sum: '$items.quantity' },
+            revenue: { $sum: '$items.subtotal' },
+          },
+        },
+        { $sort: { revenue: -1 } },
+        { $limit: 5 },
+      ]),
+      Order.find(dateFilter).sort({ createdAt: -1 }).limit(5).select('orderNumber tableNumber totalAmount status createdAt'),
+    ]);
+
+    const revenueTotal = totalRevenue[0]?.total || 0;
+    const paidOrders = totalRevenue[0]?.paidOrders || 0;
+
+    res.json({
+      todayOrders,
+      todayRevenue: revenueTotal,
+      range: {
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+      },
+      paidOrders,
+      averageOrderValue: paidOrders ? Math.round(revenueTotal / paidOrders) : 0,
+      statusBreakdown,
+      revenueByDay: revenueByDay.map((day) => ({
+        date: day._id,
+        revenue: day.revenue,
+        orders: day.orders,
+      })),
+      revenueByMonth: revenueByMonth.map((month) => ({
+        month: month._id,
+        revenue: month.revenue,
+        orders: month.orders,
+      })),
+      topItems: topItems.map((item) => ({
+        name: item._id,
+        quantity: item.quantity,
+        revenue: item.revenue,
+      })),
+      recentOrders,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;
