@@ -15,6 +15,28 @@ function toDataURL(file) {
   });
 }
 
+async function resizeImage(file) {
+  const source = await toDataURL(file);
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = source;
+  });
+
+  const maxSize = 900;
+  const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+  const width = Math.max(1, Math.round(img.width * scale));
+  const height = Math.max(1, Math.round(img.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, width, height);
+  return canvas.toDataURL('image/jpeg', 0.82);
+}
+
 function ImagePreview({ src, alt, size = 56 }) {
   if (src) {
     return <img src={src} alt={alt} style={{ width: size, height: size, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--border)' }} />;
@@ -74,7 +96,7 @@ export default function AdminPage() {
     }
 
     try {
-      const image = await toDataURL(file);
+      const image = await resizeImage(file);
       setForm((prev) => ({ ...prev, image }));
     } catch {
       toast.error('Không đọc được ảnh');
