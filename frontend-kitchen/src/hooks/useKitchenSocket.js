@@ -5,6 +5,36 @@ export function useKitchenSocket({ onNewOrder, onOrderUpdated, soundEnabled = fa
   const socketRef = useRef(null);
   const audioRef = useRef(null);
 
+  function getAudio() {
+    if (!audioRef.current) {
+      const audio = new Audio();
+      audio.preload = 'auto';
+      audioRef.current = audio;
+    }
+
+    return audioRef.current;
+  }
+
+  async function playNotificationSound() {
+    const audio = getAudio();
+    const sources = ['/notification.mp3', '/notifiation.mp3'];
+
+    for (const src of sources) {
+      try {
+        audio.pause();
+        audio.src = src;
+        audio.load();
+        audio.currentTime = 0;
+        await audio.play();
+        return true;
+      } catch {
+        continue;
+      }
+    }
+
+    return false;
+  }
+
   useEffect(() => {
     const socketUrl = import.meta.env.VITE_SOCKET_URL;
     const socket = io(socketUrl, {
@@ -22,42 +52,7 @@ export function useKitchenSocket({ onNewOrder, onOrderUpdated, soundEnabled = fa
       onNewOrder?.(order);
 
       if (soundEnabled) {
-        const tryPlay = async (src) => {
-          const audio = new Audio(src);
-          audio.preload = 'auto';
-          audio.currentTime = 0;
-          await audio.play();
-        };
-
-        const playWithFallback = async () => {
-          const sources = ['/notification.mp3', '/notifiation.mp3'];
-
-          for (const src of sources) {
-            try {
-              if (!audioRef.current || audioRef.current.src !== new URL(src, window.location.origin).href) {
-                audioRef.current = new Audio(src);
-                audioRef.current.preload = 'auto';
-              }
-
-              audioRef.current.currentTime = 0;
-              await audioRef.current.play();
-              return;
-            } catch {
-              continue;
-            }
-          }
-
-          for (const src of sources) {
-            try {
-              await tryPlay(src);
-              return;
-            } catch {
-              continue;
-            }
-          }
-        };
-
-        playWithFallback().catch(() => {});
+        playNotificationSound().catch(() => {});
       }
     });
 

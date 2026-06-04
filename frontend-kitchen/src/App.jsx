@@ -24,6 +24,7 @@ export default function App() {
   });
   const [page, setPage] = useState('kitchen');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
+  const [soundTested, setSoundTested] = useState(false);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -37,14 +38,19 @@ export default function App() {
     try {
       const audio = new Audio('/notification.mp3');
       audio.preload = 'auto';
+      audio.src = '/notification.mp3';
+      audio.load();
       await audio.play();
       audio.pause();
       audio.currentTime = 0;
       localStorage.setItem(SOUND_KEY, 'true');
       setSoundEnabled(true);
+      setSoundTested(true);
     } catch {
+      // Nếu trình duyệt vẫn chặn, vẫn bật cờ để hook tiếp tục thử phát khi có đơn mới
       localStorage.setItem(SOUND_KEY, 'true');
       setSoundEnabled(true);
+      setSoundTested(true);
     }
   }
 
@@ -64,7 +70,7 @@ export default function App() {
     localStorage.removeItem('snack_user');
   };
 
-  const showKitchenSoundPrompt = page === 'kitchen' && !soundEnabled;
+  const showKitchenSoundPrompt = page === 'kitchen' && (!soundEnabled || !soundTested);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
