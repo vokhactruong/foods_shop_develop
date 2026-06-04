@@ -25,6 +25,7 @@ export default function App() {
   });
   const [page, setPage] = useState('kitchen');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
+  const [soundTested, setSoundTested] = useState(false);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -34,20 +35,16 @@ export default function App() {
     else setPage('kitchen');
   }, []);
 
-  useEffect(() => {
-    if (page !== 'kitchen' || !soundEnabled) return;
-
-    unlockNotificationSound().catch(() => {});
-  }, [page, soundEnabled]);
-
   async function enableSound() {
     try {
       await unlockNotificationSound();
       localStorage.setItem(SOUND_KEY, 'true');
       setSoundEnabled(true);
+      setSoundTested(true);
     } catch {
       localStorage.setItem(SOUND_KEY, 'true');
       setSoundEnabled(true);
+      setSoundTested(true);
     }
   }
 
@@ -67,7 +64,7 @@ export default function App() {
     localStorage.removeItem('snack_user');
   };
 
-  const showKitchenSoundPrompt = page === 'kitchen' && !soundEnabled;
+  const showKitchenSoundPrompt = page === 'kitchen' && (!soundEnabled || !soundTested);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
