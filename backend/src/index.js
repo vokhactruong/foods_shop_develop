@@ -54,13 +54,30 @@ app.use('/api/tables', tableRoutes);
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
 initSocket(io);
-console.log('MONGODB_URI exists:', !!process.env.MONGODB_URI);
 mongoose
   .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/snack-shop')
   .then(() => {
     console.log('✅ MongoDB kết nối thành công');
-    const PORT = process.env.PORT || 5000;
-    server.listen(PORT, () => console.log(`🚀 Server đang chạy tại http://localhost:${PORT}`));
+    const basePort = Number(process.env.PORT || 5000);
+
+    const listenOnPort = (port, attemptsLeft = 10) => {
+      server
+        .once('error', (err) => {
+          if (err.code === 'EADDRINUSE' && attemptsLeft > 0) {
+            console.warn(`Port ${port} đã bị chiếm, thử port ${port + 1}...`);
+            listenOnPort(port + 1, attemptsLeft - 1);
+            return;
+          }
+
+          console.error('❌ Không thể khởi động server:', err.message);
+          process.exit(1);
+        })
+        .listen(port, () => {
+          console.log(`🚀 Server đang chạy tại http://localhost:${port}`);
+        });
+    };
+
+    listenOnPort(basePort);
   })
   .catch((err) => {
     console.error('❌ MongoDB lỗi:', err.message);

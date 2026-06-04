@@ -39,7 +39,7 @@ export default function MenuPage({ tableNumber, onOrderPlaced }) {
 
   function addToCart(item) {
     setCart((prev) => ({ ...prev, [item._id]: { item, qty: (prev[item._id]?.qty || 0) + 1 } }));
-    toast.success(`Đã thêm ${item.name}`, { icon: item.emoji });
+    toast.success(`Đã thêm ${item.name}`);
   }
 
   function updateQty(itemId, delta) {

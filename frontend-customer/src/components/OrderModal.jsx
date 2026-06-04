@@ -15,7 +15,7 @@ export default function OrderModal({ cartItems, total, tableNumber, submitting, 
         <div style={{ marginBottom: 16 }}>
           {cartItems.map(({ item, qty }) => (
             <div key={item._id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontSize: 14 }}>{item.emoji} {item.name} × {qty}</span>
+              <span style={{ fontSize: 14 }}>{item.name} × {qty}</span>
               <span style={{ fontSize: 14, fontWeight: 600 }}>{(item.price * qty).toLocaleString('vi-VN')}₫</span>
             </div>
           ))}

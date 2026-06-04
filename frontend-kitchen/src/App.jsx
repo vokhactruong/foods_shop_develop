@@ -4,6 +4,7 @@ import KitchenPage from './pages/KitchenPage';
 import AdminPage from './pages/AdminPage';
 import QRPage from './pages/QRPage';
 import DashboardPage from './pages/DashboardPage';
+import { unlockNotificationSound } from './utils/notificationSound';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard' },
@@ -36,18 +37,11 @@ export default function App() {
 
   async function enableSound() {
     try {
-      const audio = new Audio('/notification.mp3');
-      audio.preload = 'auto';
-      audio.src = '/notification.mp3';
-      audio.load();
-      await audio.play();
-      audio.pause();
-      audio.currentTime = 0;
+      await unlockNotificationSound();
       localStorage.setItem(SOUND_KEY, 'true');
       setSoundEnabled(true);
       setSoundTested(true);
     } catch {
-      // Nếu trình duyệt vẫn chặn, vẫn bật cờ để hook tiếp tục thử phát khi có đơn mới
       localStorage.setItem(SOUND_KEY, 'true');
       setSoundEnabled(true);
       setSoundTested(true);
