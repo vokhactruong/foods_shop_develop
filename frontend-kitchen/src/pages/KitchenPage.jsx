@@ -21,10 +21,11 @@ function money(value) {
   return Number(value || 0).toLocaleString('vi-VN') + '₫';
 }
 
-export default function KitchenPage() {
+export default function KitchenPage({ soundEnabled = false }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [connected, setConnected] = useState(false);
+  const [selectedPaidIds, setSelectedPaidIds] = useState(() => new Set());
 
   useEffect(() => {
     loadOrders();
@@ -32,6 +33,29 @@ export default function KitchenPage() {
 
   function visibleOrders(nextOrders) {
     return nextOrders.filter((order) => ACTIVE_STATUSES.includes(order.status));
+  }
+
+  function toggleSelected(orderId) {
+    setSelectedPaidIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(orderId)) next.delete(orderId);
+      else next.add(orderId);
+      return next;
+    });
+  }
+
+  function clearSelected(ids = []) {
+    if (!ids.length) return;
+    setSelectedPaidIds((prev) => {
+      const next = new Set(prev);
+      ids.forEach((id) => next.delete(id));
+      return next;
+    });
+  }
+
+  function getSelectedOrders() {
+    const selected = orders.filter((order) => selectedPaidIds.has(order._id) && order.status === 'served');
+    return selected.sort((a, b) => a.tableNumber - b.tableNumber || a.createdAt.localeCompare(b.createdAt));
   }
 
   async function loadOrders() {
@@ -47,12 +71,16 @@ export default function KitchenPage() {
   }
 
   useKitchenSocket({
+    soundEnabled,
     onNewOrder: (order) => {
       setOrders((prev) => [order, ...prev]);
       toast('Đơn mới - ' + order.orderNumber, { icon: '🔔', style: { background: '#E24B4A', color: 'white', fontWeight: 700 } });
     },
     onOrderUpdated: (updated) => {
       setOrders((prev) => visibleOrders(prev.map((order) => (order._id === updated._id ? updated : order))));
+      if (updated.status !== 'served') {
+        clearSelected([updated._id]);
+      }
     },
   });
 
@@ -63,6 +91,21 @@ export default function KitchenPage() {
       if (nextStatus === 'paid') toast.success(`Đã tính tiền ${order.orderNumber}`);
     } catch {
       toast.error('Lỗi cập nhật trạng thái');
+    }
+  }
+
+  async function paySelected() {
+    const selected = getSelectedOrders();
+    if (!selected.length) return toast.error('Chọn ít nhất 1 order để tính tiền');
+
+    try {
+      await Promise.all(selected.map((order) => updateOrderStatus(order._id, 'paid')));
+      const selectedIds = selected.map((order) => order._id);
+      setOrders((prev) => visibleOrders(prev.map((order) => (selectedIds.includes(order._id) ? { ...order, status: 'paid' } : order))));
+      clearSelected(selectedIds);
+      toast.success(`Đã tính tiền ${selected.length} order`);
+    } catch {
+      toast.error('Không thể tính tiền cho các order đã chọn');
     }
   }
 
@@ -80,9 +123,41 @@ export default function KitchenPage() {
         </button>
       </div>
 
+      {selectedPaidIds.size > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <strong style={{ fontSize: 13 }}>Đã chọn {getSelectedOrders().length} order chờ thanh toán</strong>
+            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+              Tổng tiền: {money(getSelectedOrders().reduce((sum, order) => sum + order.totalAmount, 0))}
+            </span>
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => setSelectedPaidIds(new Set())}
+              style={{ padding: '7px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 12, fontWeight: 700 }}
+            >
+              Bỏ chọn
+            </button>
+            <button
+              onClick={paySelected}
+              style={{ padding: '7px 12px', borderRadius: 8, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 12, fontWeight: 800 }}
+            >
+              Tính tiền
+            </button>
+          </div>
+        </div>
+      )}
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12, flex: 1 }}>
         {STATUSES.map(({ key, label, color, bg }) => {
-          const col = orders.filter((order) => key === 'doing' ? ['doing', 'done'].includes(order.status) : order.status === key);
+          const col = orders
+            .filter((order) => (key === 'doing' ? ['doing', 'done'].includes(order.status) : order.status === key))
+            .sort((a, b) => {
+              if (key === 'served') {
+                return a.tableNumber - b.tableNumber || new Date(a.createdAt) - new Date(b.createdAt);
+              }
+              return new Date(b.createdAt) - new Date(a.createdAt);
+            });
           return (
             <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <div style={{ background: bg, border: `1px solid ${color}30`, borderRadius: 10, padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -101,8 +176,20 @@ export default function KitchenPage() {
                         <div style={{ fontSize: 13, fontWeight: 700, color }}>{order.orderNumber}</div>
                         <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>{timeSince(order.createdAt)}</div>
                       </div>
-                      <div style={{ background: color + '20', color, borderRadius: 6, padding: '2px 8px', fontSize: 12, fontWeight: 700 }}>
-                        Bàn {order.tableNumber}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        {key === 'served' && (
+                          <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 12, color: 'var(--text-muted)' }}>
+                            <input
+                              type="checkbox"
+                              checked={selectedPaidIds.has(order._id)}
+                              onChange={() => toggleSelected(order._id)}
+                            />
+                            Chọn
+                          </label>
+                        )}
+                        <div style={{ background: color + '20', color, borderRadius: 6, padding: '2px 8px', fontSize: 12, fontWeight: 700 }}>
+                          Bàn {order.tableNumber}
+                        </div>
                       </div>
                     </div>
 

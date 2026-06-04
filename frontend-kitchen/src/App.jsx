@@ -12,6 +12,8 @@ const NAV_ITEMS = [
   { key: 'admin', label: 'Quản lý' },
 ];
 
+const SOUND_KEY = 'snack_kitchen_sound_enabled';
+
 export default function App() {
   const [user, setUser] = useState(() => {
     try {
@@ -21,6 +23,7 @@ export default function App() {
     }
   });
   const [page, setPage] = useState('kitchen');
+  const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -29,6 +32,21 @@ export default function App() {
     else if (path.includes('qr')) setPage('qr');
     else setPage('kitchen');
   }, []);
+
+  async function enableSound() {
+    try {
+      const audio = new Audio('/notification.mp3');
+      audio.preload = 'auto';
+      await audio.play();
+      audio.pause();
+      audio.currentTime = 0;
+      localStorage.setItem(SOUND_KEY, 'true');
+      setSoundEnabled(true);
+    } catch {
+      localStorage.setItem(SOUND_KEY, 'true');
+      setSoundEnabled(true);
+    }
+  }
 
   if (!user) {
     return (
@@ -45,6 +63,8 @@ export default function App() {
     setUser(null);
     localStorage.removeItem('snack_user');
   };
+
+  const showKitchenSoundPrompt = page === 'kitchen' && !soundEnabled;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -75,9 +95,47 @@ export default function App() {
       </nav>
 
       {page === 'dashboard' && <DashboardPage token={user.token} />}
-      {page === 'kitchen' && <KitchenPage token={user.token} />}
+      {page === 'kitchen' && <KitchenPage token={user.token} soundEnabled={soundEnabled} />}
       {page === 'qr' && <QRPage token={user.token} />}
       {page === 'admin' && <AdminPage token={user.token} />}
+
+      {showKitchenSoundPrompt && (
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.72)',
+            display: 'grid',
+            placeItems: 'center',
+            zIndex: 50,
+            padding: 20,
+          }}
+        >
+          <div style={{ width: '100%', maxWidth: 420, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
+            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Bật âm thanh thông báo</div>
+            <div style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
+              Bật âm thanh để khi có đơn mới, bếp sẽ phát file <code>/notification.mp3</code>.
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button
+                onClick={() => {
+                  localStorage.setItem(SOUND_KEY, 'true');
+                  setSoundEnabled(true);
+                }}
+                style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, fontWeight: 700 }}
+              >
+                Không bật
+              </button>
+              <button
+                onClick={enableSound}
+                style={{ padding: '9px 14px', borderRadius: 8, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 13, fontWeight: 800 }}
+              >
+                Bật âm thanh
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
