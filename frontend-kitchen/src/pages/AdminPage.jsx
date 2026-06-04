@@ -147,90 +147,92 @@ export default function AdminPage() {
       </div>
 
       {showForm && (
-        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 20, marginBottom: 20 }}>
-          <h3 style={{ marginBottom: 16, fontWeight: 700 }}>{editing ? 'Sửa món' : 'Thêm món mới'}</h3>
+        <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', padding: 20, marginBottom: 20, overflowX: 'auto' }}>
+          <div style={{ minWidth: 640 }}>
+            <h3 style={{ marginBottom: 16, fontWeight: 700 }}>{editing ? 'Sửa món' : 'Thêm món mới'}</h3>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
-            <div>
-              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Tên món *</label>
-              <input
-                value={form.name}
-                onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="Tên món ăn"
-                style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Giá (VNĐ) *</label>
-              <input
-                value={form.price}
-                onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
-                type="number"
-                placeholder="15000"
-                style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Danh mục</label>
-              <select
-                value={form.category}
-                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
-              >
-                {CATS.map((c) => <option key={c} value={c}>{CAT_LABELS[c]}</option>)}
-              </select>
-            </div>
-            <div>
-              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Ảnh món</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e.target.files?.[0])}
-                style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 14 }}
-              />
-              <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <ImagePreview src={form.image} alt={form.name || 'preview'} />
-                <div style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.5 }}>
-                  Ảnh sẽ được lưu trực tiếp vào dữ liệu món.
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+              <div>
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Tên món *</label>
+                <input
+                  value={form.name}
+                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+                  placeholder="Tên món ăn"
+                  style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Giá (VNĐ) *</label>
+                <input
+                  value={form.price}
+                  onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
+                  type="number"
+                  placeholder="15000"
+                  style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Danh mục</label>
+                <select
+                  value={form.category}
+                  onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                  style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
+                >
+                  {CATS.map((c) => <option key={c} value={c}>{CAT_LABELS[c]}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Ảnh món</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => handleImageChange(e.target.files?.[0])}
+                  style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 14 }}
+                />
+                <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <ImagePreview src={form.image} alt={form.name || 'preview'} />
+                  <div style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.5 }}>
+                    Ảnh sẽ được lưu trực tiếp vào dữ liệu món.
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Mô tả</label>
-            <input
-              value={form.description}
-              onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-              placeholder="Mô tả ngắn"
-              style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
-            />
-          </div>
+            <div style={{ marginBottom: 12 }}>
+              <label style={{ fontSize: 12, color: 'var(--text-muted)', display: 'block', marginBottom: 5 }}>Mô tả</label>
+              <input
+                value={form.description}
+                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                placeholder="Mô tả ngắn"
+                style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '9px 12px', color: 'var(--text)', fontSize: 14 }}
+              />
+            </div>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, marginBottom: 16, cursor: 'pointer' }}>
-            <input type="checkbox" checked={form.available} onChange={(e) => setForm((f) => ({ ...f, available: e.target.checked }))} />
-            Còn phục vụ
-          </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, marginBottom: 16, cursor: 'pointer' }}>
+              <input type="checkbox" checked={form.available} onChange={(e) => setForm((f) => ({ ...f, available: e.target.checked }))} />
+              Còn phục vụ
+            </label>
 
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button
-              onClick={() => setShowForm(false)}
-              style={{ padding: '9px 20px', border: '1px solid var(--border)', borderRadius: 8, background: 'transparent', color: 'var(--text-muted)', fontSize: 14 }}
-            >
-              Hủy
-            </button>
-            <button
-              onClick={handleSave}
-              style={{ padding: '9px 20px', border: 'none', borderRadius: 8, background: 'var(--primary)', color: 'white', fontWeight: 700, fontSize: 14 }}
-            >
-              Lưu
-            </button>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={() => setShowForm(false)}
+                style={{ padding: '9px 20px', border: '1px solid var(--border)', borderRadius: 8, background: 'transparent', color: 'var(--text-muted)', fontSize: 14 }}
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSave}
+                style={{ padding: '9px 20px', border: 'none', borderRadius: 8, background: 'var(--primary)', color: 'white', fontWeight: 700, fontSize: 14 }}
+              >
+                Lưu
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflowX: 'auto', overflowY: 'hidden' }}>
+        <table style={{ width: '100%', minWidth: 760, borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-card2)' }}>
               {['', 'Tên món', 'Danh mục', 'Giá', 'Trạng thái', 'Thao tác'].map((h) => (
