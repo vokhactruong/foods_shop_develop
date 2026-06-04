@@ -4,6 +4,21 @@ import { playNotificationSound } from '../utils/notificationSound';
 
 export function useKitchenSocket({ onNewOrder, onOrderUpdated, soundEnabled = false }) {
   const socketRef = useRef(null);
+  const onNewOrderRef = useRef(onNewOrder);
+  const onOrderUpdatedRef = useRef(onOrderUpdated);
+  const soundEnabledRef = useRef(soundEnabled);
+
+  useEffect(() => {
+    onNewOrderRef.current = onNewOrder;
+  }, [onNewOrder]);
+
+  useEffect(() => {
+    onOrderUpdatedRef.current = onOrderUpdated;
+  }, [onOrderUpdated]);
+
+  useEffect(() => {
+    soundEnabledRef.current = soundEnabled;
+  }, [soundEnabled]);
 
   useEffect(() => {
     const socketUrl = import.meta.env.VITE_SOCKET_URL;
@@ -18,20 +33,23 @@ export function useKitchenSocket({ onNewOrder, onOrderUpdated, soundEnabled = fa
       socket.emit('join_kitchen');
     });
 
-    socket.on('new_order', (order) => {
-      onNewOrder?.(order);
+    const handleNewOrder = (order) => {
+      onNewOrderRef.current?.(order);
 
-      if (soundEnabled) {
+      if (soundEnabledRef.current) {
         playNotificationSound().catch(() => {});
       }
-    });
+    };
 
-    socket.on('order_updated', (order) => {
-      onOrderUpdated?.(order);
-    });
+    const handleOrderUpdated = (order) => {
+      onOrderUpdatedRef.current?.(order);
+    };
+
+    socket.on('new_order', handleNewOrder);
+    socket.on('order_updated', handleOrderUpdated);
 
     return () => socket.disconnect();
-  }, [onNewOrder, onOrderUpdated, soundEnabled]);
+  }, []);
 
   return socketRef;
 }
