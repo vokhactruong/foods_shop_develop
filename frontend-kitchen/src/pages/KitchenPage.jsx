@@ -232,18 +232,42 @@ export default function KitchenPage({ soundEnabled = false }) {
   }, [selectedOrders]);
 
   const moveOrder = useCallback(async (orderId, nextStatus, orderNumber) => {
+    let previousOrder = null;
+
+    setOrders((prev) => {
+      previousOrder = prev.find((item) => item._id === orderId);
+      return visibleOrders(prev.map((item) => (item._id === orderId ? { ...item, status: nextStatus } : item)));
+    });
+    clearSelected([orderId]);
+
     try {
       const updated = await updateOrderStatus(orderId, nextStatus);
       setOrders((prev) => visibleOrders(prev.map((item) => (item._id === updated._id ? updated : item))));
       clearSelected([orderId]);
       if (nextStatus === 'paid') toast.success(`Đã tính tiền ${orderNumber}`);
     } catch {
+      if (previousOrder) {
+        setOrders((prev) => {
+          const exists = prev.some((item) => item._id === previousOrder._id);
+          const restored = exists
+            ? prev.map((item) => (item._id === previousOrder._id ? previousOrder : item))
+            : [previousOrder, ...prev];
+
+          return visibleOrders(restored);
+        });
+      }
       toast.error('Lỗi cập nhật trạng thái');
     }
   }, [clearSelected, visibleOrders]);
 
   const paySelected = useCallback(async () => {
     if (!selectedOrders.length) return toast.error('Chọn ít nhất 1 order để tính tiền');
+
+    const selectedSnapshot = selectedOrders;
+    const selectedIds = selectedSnapshot.map((order) => order._id);
+
+    setOrders((prev) => visibleOrders(prev.map((order) => (selectedIds.includes(order._id) ? { ...order, status: 'paid' } : order))));
+    clearSelected(selectedIds);
 
     try {
       await Promise.all(selectedOrders.map((order) => updateOrderStatus(order._id, 'paid')));
@@ -252,6 +276,7 @@ export default function KitchenPage({ soundEnabled = false }) {
       clearSelected(selectedIds);
       toast.success(`Đã tính tiền ${selectedOrders.length} order`);
     } catch {
+      await loadOrders();
       toast.error('Không thể tính tiền cho các order đã chọn');
     }
   }, [clearSelected, selectedOrders, visibleOrders]);
