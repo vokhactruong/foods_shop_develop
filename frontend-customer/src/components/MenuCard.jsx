@@ -24,7 +24,13 @@ export default function MenuCard({ item, qty, onAdd, onUpdateQty }) {
         }}
       >
         {item.image ? (
-          <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img
+            src={item.image}
+            alt={item.name}
+            loading="lazy"
+            decoding="async"
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          />
         ) : (
           <div style={{ width: '100%', height: '100%', display: 'grid', placeItems: 'center', fontSize: 28, color: 'var(--text-muted)' }}>
             {item.name?.slice(0, 1)?.toUpperCase()}

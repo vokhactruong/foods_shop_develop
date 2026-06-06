@@ -14,11 +14,14 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ message: 'Thiếu thông tin đơn hàng' });
 
     // Validate và tính giá từ DB
+    const itemIds = items.map((item) => item.menuItemId);
+    const menuItems = await MenuItem.find({ _id: { $in: itemIds } }).lean();
+    const menuById = new Map(menuItems.map((item) => [item._id.toString(), item]));
     const enrichedItems = [];
     let totalAmount = 0;
 
     for (const item of items) {
-      const menuItem = await MenuItem.findById(item.menuItemId);
+      const menuItem = menuById.get(item.menuItemId);
       if (!menuItem || !menuItem.available)
         return res.status(400).json({ message: `Món "${item.name}" không còn phục vụ` });
 
@@ -68,7 +71,7 @@ router.get('/', auth, async (req, res) => {
       today.setHours(0, 0, 0, 0);
       filter.createdAt = { $gte: today };
     }
-    const orders = await Order.find(filter).sort({ createdAt: -1 });
+    const orders = await Order.find(filter).sort({ createdAt: -1 }).lean();
     res.json(orders);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -167,7 +170,7 @@ router.get('/stats', auth, async (req, res) => {
         { $sort: { revenue: -1 } },
         { $limit: 5 },
       ]),
-      Order.find(dateFilter).sort({ createdAt: -1 }).limit(5).select('orderNumber tableNumber totalAmount status createdAt'),
+      Order.find(dateFilter).sort({ createdAt: -1 }).limit(5).select('orderNumber tableNumber totalAmount status createdAt').lean(),
     ]);
 
     const revenueTotal = totalRevenue[0]?.total || 0;

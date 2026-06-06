@@ -8,7 +8,7 @@ router.get('/', async (req, res) => {
     const { category } = req.query;
     const filter = { available: true };
     if (category && category !== 'all') filter.category = category;
-    const items = await MenuItem.find(filter).sort({ sortOrder: 1, createdAt: 1 });
+    const items = await MenuItem.find(filter).sort({ sortOrder: 1, createdAt: 1 }).lean();
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 // GET /api/menu/all — admin (bao gồm món đã ẩn)
 router.get('/all', auth, async (_req, res) => {
   try {
-    const items = await MenuItem.find().sort({ sortOrder: 1, createdAt: 1 });
+    const items = await MenuItem.find().sort({ sortOrder: 1, createdAt: 1 }).lean();
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
