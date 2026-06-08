@@ -2,16 +2,21 @@ const router = require('express').Router();
 const Order = require('../models/Order');
 const MenuItem = require('../models/MenuItem');
 const auth = require('../middleware/auth');
+const TableSession = require('../models/TableSession');
+
 
 const PAID_STATUSES = ['paid'];
 
 // POST /api/orders — khách tạo đơn
 router.post('/', async (req, res) => {
   try {
-    const { tableNumber, items, note } = req.body;
+    const { token, items, note } = req.body;
 
-    if (!tableNumber || !items || !items.length)
+    if (!token || !items || !items.length) {
       return res.status(400).json({ message: 'Thiếu thông tin đơn hàng' });
+    }
+
+
 
     // Validate và tính giá từ DB
     const itemIds = items.map((item) => item.menuItemId);
@@ -19,6 +24,17 @@ router.post('/', async (req, res) => {
     const menuById = new Map(menuItems.map((item) => [item._id.toString(), item]));
     const enrichedItems = [];
     let totalAmount = 0;
+
+    const session = await TableSession.findOne({ token });
+
+    if (!session || session.expiresAt <= new Date()) {
+
+      if (session?._id) await TableSession.deleteOne({ _id: session._id });
+      return res.status(403).json({ message: 'Phiên gọi món đã hết hạn, vui lòng quét lại QR.', code: 'SessionExpired' });
+    }
+
+
+
 
     for (const item of items) {
       const menuItem = menuById.get(item.menuItemId);
@@ -37,12 +53,13 @@ router.post('/', async (req, res) => {
     }
 
     const order = await Order.create({
-      tableNumber,
+      tableNumber: session.tableNumber,
       items: enrichedItems,
       totalAmount,
       note: note || '',
       statusHistory: [{ status: 'new' }],
     });
+
 
     // Emit real-time tới màn hình bếp
     req.io.to('kitchen').emit('new_order', order);
