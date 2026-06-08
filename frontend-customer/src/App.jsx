@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import MenuPage from './pages/MenuPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import SessionExpiredPopup from './components/SessionExpiredPopup';
-import { getStoredToken, setStoredToken, clearStoredToken } from './utils/sessions';
+import { getStoredToken, setStoredToken, clearStoredToken, markSessionExpired, isSessionExpired, clearSessionExpiredFlag } from './utils/sessions';
 import { createTableSession, validateTableSession } from './utils/api';
 
 export default function App() {
@@ -24,6 +24,14 @@ export default function App() {
     async function initSession() {
       try {
         setSessionLoading(true);
+
+        // Nếu session đã hết hạn trước đó, không tạo session mới
+        if (isSessionExpired()) {
+          if (cancelled) return;
+          setSessionExpiredOpen(true);
+          return;
+        }
+
         const existingToken = getStoredToken();
 
         if (existingToken) {
@@ -53,7 +61,7 @@ export default function App() {
       } catch (err) {
         // Với luồng expired: backend trả 403 + message đúng yêu cầu
         if (cancelled) return;
-        clearStoredToken();
+        markSessionExpired();
         setSessionToken(null);
         setSessionTableNumber(null);
 

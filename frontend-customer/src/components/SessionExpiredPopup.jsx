@@ -1,7 +1,13 @@
 import React from 'react';
+import { clearSessionExpiredFlag } from '../utils/sessions';
 
 export default function SessionExpiredPopup({ open, onClose }) {
   if (!open) return null;
+
+  const handleRescanQR = () => {
+    clearSessionExpiredFlag();
+    window.location.reload();
+  };
 
   return (
     <div
@@ -39,7 +45,7 @@ export default function SessionExpiredPopup({ open, onClose }) {
           Vui lòng quét lại QR.
         </div>
         <button
-          onClick={onClose}
+          onClick={handleRescanQR}
           style={{
             background: 'var(--primary)',
             color: 'white',
