@@ -24,20 +24,43 @@ export default function App() {
     async function initSession() {
       try {
         setSessionLoading(true);
+
+        // Nếu trước đó đã xác định session hết hạn => chặn refresh hoàn toàn
+        const expiredFlag = localStorage.getItem('session_expired');
+        if (expiredFlag === 'true') {
+          setSessionExpiredOpen(true);
+          setSessionLoading(false);
+          return;
+        }
+
         const existingToken = getStoredToken();
 
+        // Có token => validate. Nếu expired thì CHỈ show popup, không tạo token mới.
         if (existingToken) {
-          const res = await validateTableSession(existingToken);
-          if (res?.valid) {
-            if (cancelled) return;
-            setSessionToken(existingToken);
-            setSessionTableNumber(res.tableNumber);
-            setSessionExpiredOpen(false);
+          try {
+            const res = await validateTableSession(existingToken);
+            if (res?.valid) {
+              if (cancelled) return;
+              setSessionToken(existingToken);
+              setSessionTableNumber(res.tableNumber);
+              setSessionExpiredOpen(false);
+              return;
+            }
+          } catch (_err) {
+            // validateTableSession ném lỗi khi backend trả 403
+            localStorage.setItem('session_expired', 'true');
+            clearStoredToken();
+            setSessionToken(null);
+            setSessionTableNumber(null);
+            setSessionExpiredOpen(true);
             return;
           }
         }
 
-        // Không có token hoặc token expired => tạo token mới
+        // Không có token => tạo session mới
+        // Người dùng quét QR lại => có cơ hội tạo session mới, xóa cờ expired
+        localStorage.removeItem('session_expired');
+
         const created = await createTableSession(tableNumberFromUrl);
         setStoredToken(created.token);
         if (cancelled) return;
@@ -50,17 +73,13 @@ export default function App() {
         setSessionToken(created.token);
         setSessionTableNumber(validated.tableNumber);
         setSessionExpiredOpen(false);
-      } catch (err) {
-        // Với luồng expired: backend trả 403 + message đúng yêu cầu
+      } catch (_err) {
         if (cancelled) return;
+        localStorage.setItem('session_expired', 'true');
         clearStoredToken();
         setSessionToken(null);
         setSessionTableNumber(null);
-
         setSessionExpiredOpen(true);
-
-        // Không toast thêm để tránh chồng thông báo
-        // toast.error(err?.response?.data?.message || 'Phiên hết hạn');
       } finally {
         if (!cancelled) setSessionLoading(false);
       }
