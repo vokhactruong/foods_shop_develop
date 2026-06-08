@@ -170,7 +170,7 @@ export default function KitchenPage({ soundEnabled = false }) {
   }, []);
 
   const onNewOrder = useCallback((order) => {
-    setOrders((prev) => [order, ...prev]);
+    setOrders((prev) => [...prev, order]);
     toast('Đơn mới - ' + order.orderNumber, { icon: '🔔', style: { background: '#E24B4A', color: 'white', fontWeight: 700 } });
   }, []);
 
@@ -216,8 +216,8 @@ export default function KitchenPage({ soundEnabled = false }) {
       else if (order.status === 'served') grouped.served.push(order);
     }
 
-    grouped.new.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    grouped.doing.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    grouped.new.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    grouped.doing.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
     grouped.served.sort((a, b) => a.tableNumber - b.tableNumber || new Date(a.createdAt) - new Date(b.createdAt));
 
     return grouped;
