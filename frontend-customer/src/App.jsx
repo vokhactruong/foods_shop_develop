@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import MenuPage from './pages/MenuPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import SessionExpiredPopup from './components/SessionExpiredPopup';
-import { getStoredToken, setStoredToken, clearStoredToken, markSessionExpired, isSessionExpired } from './utils/sessions';
+import { getStoredToken, setStoredToken, clearStoredToken, markSessionExpired, isSessionExpired, clearSessionExpiredFlag } from './utils/sessions';
 import { createTableSession, validateTableSession } from './utils/api';
 
 export default function App() {
@@ -25,18 +25,29 @@ export default function App() {
       try {
         setSessionLoading(true);
 
-        // Nếu session đã hết hạn, không tạo session mới. Chỉ show popup
-        // Chỉ xóa flag này khi user quét QR thành công
-        if (isSessionExpired()) {
-          if (cancelled) return;
-          setSessionExpiredOpen(true);
-          setSessionLoading(false);
-          return;
+        // Kiểm tra nếu session đã hết hạn
+        const isExpired = isSessionExpired();
+        
+        if (isExpired) {
+          // Lấy navigation type: 'navigate' (link mới), 'reload' (F5), etc
+          const navigationType = performance.getEntriesByType('navigation')[0]?.type;
+
+          // Nếu là reload, chặn (vẫn show popup)
+          if (navigationType === 'reload') {
+            if (cancelled) return;
+            setSessionExpiredOpen(true);
+            setSessionLoading(false);
+            return;
+          }
+
+          // Nếu là navigate (mở URL mới từ camera), cho phép tạo session mới
+          // Xóa flag và tiếp tục
+          clearSessionExpiredFlag();
         }
 
         const existingToken = getStoredToken();
 
-        if (existingToken) {
+        if (existingToken && !isExpired) {
           const res = await validateTableSession(existingToken);
           if (res?.valid) {
             if (cancelled) return;
