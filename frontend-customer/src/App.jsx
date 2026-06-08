@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import MenuPage from './pages/MenuPage';
 import OrderSuccessPage from './pages/OrderSuccessPage';
 import SessionExpiredPopup from './components/SessionExpiredPopup';
-import { getStoredToken, setStoredToken, clearStoredToken, markSessionExpired, isSessionExpired, clearSessionExpiredFlag } from './utils/sessions';
+import { getStoredToken, setStoredToken, clearStoredToken, markSessionExpired, isSessionExpired } from './utils/sessions';
 import { createTableSession, validateTableSession } from './utils/api';
 
 export default function App() {
@@ -25,10 +25,12 @@ export default function App() {
       try {
         setSessionLoading(true);
 
-        // Nếu session đã hết hạn trước đó, không tạo session mới
+        // Nếu session đã hết hạn, không tạo session mới. Chỉ show popup
+        // Chỉ xóa flag này khi user quét QR thành công
         if (isSessionExpired()) {
           if (cancelled) return;
           setSessionExpiredOpen(true);
+          setSessionLoading(false);
           return;
         }
 
@@ -95,7 +97,7 @@ export default function App() {
 
   return (
     <>
-      <SessionExpiredPopup open={sessionExpiredOpen} onClose={() => setSessionExpiredOpen(true)} />
+      <SessionExpiredPopup open={sessionExpiredOpen} />
       {sessionLoading || sessionTableNumber == null ? (
         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Đang kiểm tra phiên...</div>
       ) : (

@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { clearSessionExpiredFlag } from '../utils/sessions';
+import QRScanner from './QRScanner';
 
 export default function SessionExpiredPopup({ open, onClose }) {
+  const [showScanner, setShowScanner] = useState(false);
+
   if (!open) return null;
 
   const handleRescanQR = () => {
-    clearSessionExpiredFlag();
-    window.location.reload();
+    setShowScanner(true);
   };
+
+  const handleScanSuccess = (decodedText) => {
+    clearSessionExpiredFlag();
+    window.location.href = decodedText;
+  };
+
+  const handleScannerClose = () => {
+    setShowScanner(false);
+  };
+
+  if (showScanner) {
+    return <QRScanner onScanSuccess={handleScanSuccess} onClose={handleScannerClose} />;
+  }
 
   return (
     <div
