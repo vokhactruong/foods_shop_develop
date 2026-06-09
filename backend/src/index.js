@@ -9,9 +9,7 @@ const menuRoutes = require('./routes/menu');
 const orderRoutes = require('./routes/orders');
 const tableRoutes = require('./routes/tables');
 const authRoutes = require('./routes/auth');
-const tableSessionRoutes = require('./routes/tableSessions');
 const initSocket = require('./socket');
-
 
 const app = express();
 const server = http.createServer(app);
@@ -53,10 +51,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/menu', menuRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/tables', tableRoutes);
-app.use('/api/tables/sessions', tableSessionRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
-
 
 initSocket(io);
 mongoose

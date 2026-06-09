@@ -13,8 +13,7 @@ const CATEGORIES = [
   { id: 'sweet', label: 'Bánh', icon: '🍪' },
 ];
 
-export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
-
+export default function MenuPage({ tableNumber, onOrderPlaced }) {
   const [menu, setMenu] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
@@ -63,7 +62,7 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
     try {
       setSubmitting(true);
       const orderPayload = {
-        token,
+        tableNumber,
         note,
         items: cartItems.map(({ item, qty }) => ({
           menuItemId: item._id,
@@ -71,7 +70,6 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
           quantity: qty,
         })),
       };
-
       const order = await placeOrder(orderPayload);
       setCart({});
       setShowModal(false);
@@ -146,8 +144,6 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
         <CartBar count={cartCount} total={cartTotal} onOrder={() => setShowModal(true)} />
       )}
 
-
-
       {/* Order modal */}
       {showModal && (
         <OrderModal
@@ -159,7 +155,6 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
           onClose={() => setShowModal(false)}
         />
       )}
-
     </div>
   );
 }
