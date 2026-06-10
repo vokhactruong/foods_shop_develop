@@ -7,8 +7,8 @@ const menuItemSchema = new mongoose.Schema(
     price: { type: Number, required: true, min: 0 },
     category: {
       type: String,
-      enum: ['chips', 'drink', 'sweet', 'hot', 'other'],
-      default: 'other',
+      enum: ['che', 'suachua', 'caramen', 'monmoi', 'douong', 'doanutat', 'pizza', 'mycay'],
+      default: 'monmoi',
     },
     emoji: { type: String, default: '🍿' },
     image: { type: String, default: '' },

@@ -6,11 +6,15 @@ import CartBar from '../components/CartBar';
 import OrderModal from '../components/OrderModal';
 
 const CATEGORIES = [
-  { id: 'all', label: 'Tất cả', icon: '🍿' },
-  { id: 'chips', label: 'Snack', icon: '🧀' },
-  { id: 'hot', label: 'Đồ nóng', icon: '🔥' },
-  { id: 'drink', label: 'Nước', icon: '🧋' },
-  { id: 'sweet', label: 'Bánh', icon: '🍪' },
+  { id: 'all', label: 'Tất cả', icon: '📋' },
+  { id: 'che', label: 'Chè', icon: '🍵' },
+  { id: 'suachua', label: 'Sữa Chua', icon: '🥛' },
+  { id: 'caramen', label: 'Caramen', icon: '🍮' },
+  { id: 'monmoi', label: 'Món Mới', icon: '✨' },
+  { id: 'douong', label: 'Đồ Uống', icon: '🧋' },
+  { id: 'doanutat', label: 'Ăn Vặt', icon: '🧀' },
+  { id: 'pizza', label: 'Pizza', icon: '🍕' },
+  { id: 'mycay', label: 'Mỳ Cay', icon: '🌶️' },
 ];
 
 export default function MenuPage({ tableNumber, token, onOrderPlaced }) {

@@ -1,4 +1,13 @@
-const BG_MAP = { chips: '#FAECE7', hot: '#FAEEDA', drink: '#E1F5EE', sweet: '#EEEDFE', other: '#F1EFE8' };
+const BG_MAP = {
+  che: '#E8F5E9',
+  suachua: '#FCE4EC',
+  caramen: '#EFEBE9',
+  monmoi: '#FFF9C4',
+  douong: '#E0F2F1',
+  doanutat: '#FFE0B2',
+  pizza: '#FFEBEE',
+  mycay: '#FFCCBC',
+};
 
 export default function MenuCard({ item, qty, onAdd, onUpdateQty }) {
   return (

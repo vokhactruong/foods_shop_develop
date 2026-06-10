@@ -3,9 +3,18 @@ import toast from 'react-hot-toast';
 import { getMenuAdmin, createMenuItem, updateMenuItem, deleteMenuItem } from '../utils/api';
 import { uploadToCloudinary } from '../utils/cloudinary';
 
-const EMPTY_FORM = { name: '', price: '', category: 'chips', description: '', available: true, image: '' };
-const CATS = ['chips', 'hot', 'drink', 'sweet', 'other'];
-const CAT_LABELS = { chips: 'Snack/Chips', hot: 'Đồ nóng', drink: 'Nước uống', sweet: 'Bánh ngọt', other: 'Khác' };
+const EMPTY_FORM = { name: '', price: '', category: 'monmoi', description: '', available: true, image: '' };
+const CATS = ['che', 'suachua', 'caramen', 'monmoi', 'douong', 'doanutat', 'pizza', 'mycay'];
+const CAT_LABELS = {
+  che: 'Chè',
+  suachua: 'Sữa Chua',
+  caramen: 'Caramen',
+  monmoi: 'Món Mới',
+  douong: 'Đồ Uống',
+  doanutat: 'Đồ Ăn Vặt',
+  pizza: 'Pizza',
+  mycay: 'Mỳ Cay',
+};
 
 function ImagePreview({ src, alt, size = 56 }) {
   if (src) {
