@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const MenuItem = require('../models/MenuItem');
-const auth = require('../middleware/auth');
+const { authMiddleware, adminOnly } = require('../middleware/roleAuth');
 
 // GET /api/menu — public (khách hàng xem menu)
 router.get('/', async (req, res) => {
@@ -16,7 +16,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/menu/all — admin (bao gồm món đã ẩn)
-router.get('/all', auth, async (_req, res) => {
+router.get('/all', authMiddleware, adminOnly, async (_req, res) => {
   try {
     const items = await MenuItem.find().sort({ sortOrder: 1, createdAt: 1 }).lean();
     res.json(items);
@@ -26,7 +26,7 @@ router.get('/all', auth, async (_req, res) => {
 });
 
 // POST /api/menu — admin thêm món
-router.post('/', auth, async (req, res) => {
+router.post('/', authMiddleware, adminOnly, async (req, res) => {
   try {
     const item = await MenuItem.create(req.body);
     res.status(201).json(item);
@@ -36,7 +36,7 @@ router.post('/', auth, async (req, res) => {
 });
 
 // PUT /api/menu/:id — admin sửa món
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const item = await MenuItem.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!item) return res.status(404).json({ message: 'Không tìm thấy món' });
@@ -47,7 +47,7 @@ router.put('/:id', auth, async (req, res) => {
 });
 
 // DELETE /api/menu/:id — admin xóa món
-router.delete('/:id', auth, async (req, res) => {
+router.delete('/:id', authMiddleware, adminOnly, async (req, res) => {
   try {
     const item = await MenuItem.findByIdAndDelete(req.params.id);
     if (!item) return res.status(404).json({ message: 'Không tìm thấy món' });
