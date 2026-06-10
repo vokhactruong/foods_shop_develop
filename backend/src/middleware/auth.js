@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-function authMiddleware(req, res, next) {
+module.exports = function authMiddleware(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) {
     return res.status(401).json({ message: 'Không có token xác thực' });
@@ -13,6 +13,4 @@ function authMiddleware(req, res, next) {
   } catch {
     return res.status(401).json({ message: 'Token không hợp lệ hoặc đã hết hạn' });
   }
-}
-
-module.exports = authMiddleware;
+};

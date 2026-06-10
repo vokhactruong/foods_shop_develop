@@ -7,10 +7,10 @@ import DashboardPage from './pages/DashboardPage';
 import { unlockNotificationSound } from './utils/notificationSound';
 
 const NAV_ITEMS = [
-  { key: 'dashboard', label: 'Dashboard', roles: ['admin'] },
-  { key: 'kitchen', label: 'Bếp', roles: ['admin', 'kitchen'] },
-  { key: 'qr', label: 'QR Code', roles: ['admin', 'kitchen'] },
-  { key: 'admin', label: 'Quản lý', roles: ['admin'] },
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'kitchen', label: 'Bếp' },
+  { key: 'qr', label: 'QR Code' },
+  { key: 'admin', label: 'Quản lý' },
 ];
 
 const SOUND_KEY = 'snack_kitchen_sound_enabled';
@@ -59,18 +59,10 @@ export default function App() {
     );
   }
 
-  const visibleNavItems = NAV_ITEMS.filter((item) => item.roles.includes(user.role));
-
-  const isPageAllowed = () => {
-    const item = NAV_ITEMS.find((i) => i.key === page);
-    return item && item.roles.includes(user.role);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('snack_user');
   };
-
-  useEffect(() => {
-    if (!isPageAllowed()) {
-      setPage(visibleNavItems[0]?.key || 'kitchen');
-    }
-  }, [user.role]);
 
   const showKitchenSoundPrompt = page === 'kitchen' && (!soundEnabled || !soundTested);
 
@@ -78,7 +70,7 @@ export default function App() {
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <nav style={{ background: '#111', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', padding: '0 20px', minHeight: 52, gap: 4, flexWrap: 'wrap' }}>
         <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: 15, marginRight: 20 }}>Snack House</span>
-        {visibleNavItems.map((item) => (
+        {NAV_ITEMS.map((item) => (
           <button
             key={item.key}
             onClick={() => setPage(item.key)}
