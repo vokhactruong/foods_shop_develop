@@ -1,41 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { getMenuAdmin, createMenuItem, updateMenuItem, deleteMenuItem } from '../utils/api';
+import { uploadToCloudinary } from '../utils/cloudinary';
 
 const EMPTY_FORM = { name: '', price: '', category: 'chips', description: '', available: true, image: '' };
 const CATS = ['chips', 'hot', 'drink', 'sweet', 'other'];
 const CAT_LABELS = { chips: 'Snack/Chips', hot: 'Đồ nóng', drink: 'Nước uống', sweet: 'Bánh ngọt', other: 'Khác' };
-
-function toDataURL(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result);
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-async function resizeImage(file) {
-  const source = await toDataURL(file);
-  const img = await new Promise((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-    image.src = source;
-  });
-
-  const maxSize = 900;
-  const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
-  const width = Math.max(1, Math.round(img.width * scale));
-  const height = Math.max(1, Math.round(img.height * scale));
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, width, height);
-  return canvas.toDataURL('image/jpeg', 0.82);
-}
 
 function ImagePreview({ src, alt, size = 56 }) {
   if (src) {
@@ -53,6 +23,7 @@ export default function AdminPage() {
   const [editing, setEditing] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     loadMenu();
@@ -96,10 +67,14 @@ export default function AdminPage() {
     }
 
     try {
-      const image = await resizeImage(file);
-      setForm((prev) => ({ ...prev, image }));
-    } catch {
-      toast.error('Không đọc được ảnh');
+      setUploading(true);
+      const imageUrl = await uploadToCloudinary(file);
+      setForm((prev) => ({ ...prev, image: imageUrl }));
+      toast.success('Đã upload ảnh');
+    } catch (error) {
+      toast.error(error.message || 'Lỗi upload ảnh');
+    } finally {
+      setUploading(false);
     }
   }
 
@@ -187,12 +162,13 @@ export default function AdminPage() {
                   type="file"
                   accept="image/*"
                   onChange={(e) => handleImageChange(e.target.files?.[0])}
-                  style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 14 }}
+                  disabled={uploading}
+                  style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', color: 'var(--text)', fontSize: 14, opacity: uploading ? 0.6 : 1, cursor: uploading ? 'not-allowed' : 'pointer' }}
                 />
                 <div style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
                   <ImagePreview src={form.image} alt={form.name || 'preview'} />
                   <div style={{ color: 'var(--text-muted)', fontSize: 12, lineHeight: 1.5 }}>
-                    Ảnh sẽ được lưu trực tiếp vào dữ liệu món.
+                    {uploading ? '⏳ Đang upload...' : 'Upload trực tiếp lên Cloudinary'}
                   </div>
                 </div>
               </div>
