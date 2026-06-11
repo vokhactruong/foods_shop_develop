@@ -14,6 +14,7 @@ const NAV_ITEMS = [
 ];
 
 const SOUND_KEY = 'snack_kitchen_sound_enabled';
+const ADMIN_PAGES = ['dashboard', 'admin'];
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -27,6 +28,9 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
   const [soundTested, setSoundTested] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const account = user?.user || user;
+  const sessionToken = user?.token || account?.token;
+  const isAdmin = account?.role === 'admin';
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -35,6 +39,13 @@ export default function App() {
     else if (path.includes('qr')) setPage('qr');
     else setPage('kitchen');
   }, []);
+
+  useEffect(() => {
+    if (user && !isAdmin && ADMIN_PAGES.includes(page)) {
+      setPage('kitchen');
+      setMenuOpen(false);
+    }
+  }, [user, isAdmin, page]);
 
   async function enableSound() {
     try {
@@ -53,8 +64,9 @@ export default function App() {
     return (
       <LoginPage
         onLogin={(u) => {
-          setUser(u);
-          localStorage.setItem('snack_user', JSON.stringify(u));
+          const session = u?.user ? { ...u.user, token: u.token } : u;
+          setUser(session);
+          localStorage.setItem('snack_user', JSON.stringify(session));
         }}
       />
     );
@@ -67,7 +79,9 @@ export default function App() {
   };
 
   const showKitchenSoundPrompt = page === 'kitchen' && (!soundEnabled || !soundTested);
+  const navItems = isAdmin ? NAV_ITEMS : NAV_ITEMS.filter((item) => !ADMIN_PAGES.includes(item.key));
   const selectPage = (nextPage) => {
+    if (ADMIN_PAGES.includes(nextPage) && !isAdmin) return;
     setPage(nextPage);
     setMenuOpen(false);
   };
@@ -87,7 +101,7 @@ export default function App() {
         </button>
 
         <div id="kitchen-nav-menu" className={`app-nav__menu ${menuOpen ? 'app-nav__menu--open' : ''}`}>
-        {NAV_ITEMS.map((item) => (
+        {navItems.map((item) => (
           <button
             key={item.key}
             onClick={() => selectPage(item.key)}
@@ -105,17 +119,17 @@ export default function App() {
           </button>
         ))}
         <div className="app-nav__spacer" />
-        <span className="app-nav__user">{user.username}</span>
+        <span className="app-nav__user">{account?.username}</span>
         <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
           Đăng xuất
         </button>
         </div>
       </nav>
 
-      {page === 'dashboard' && <DashboardPage token={user.token} />}
-      {page === 'kitchen' && <KitchenPage token={user.token} soundEnabled={soundEnabled} />}
-      {page === 'qr' && <QRPage token={user.token} />}
-      {page === 'admin' && <AdminPage token={user.token} />}
+      {page === 'dashboard' && isAdmin && <DashboardPage token={sessionToken} />}
+      {page === 'kitchen' && <KitchenPage token={sessionToken} soundEnabled={soundEnabled} />}
+      {page === 'qr' && <QRPage token={sessionToken} />}
+      {page === 'admin' && isAdmin && <AdminPage token={sessionToken} />}
 
       {showKitchenSoundPrompt && (
         <div

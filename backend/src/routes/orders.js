@@ -7,6 +7,13 @@ const TableSession = require('../models/TableSession');
 
 const PAID_STATUSES = ['paid'];
 
+function requireAdmin(req, res, next) {
+  if (req.user?.role !== 'admin') {
+    return res.status(403).json({ message: 'Chỉ admin mới được xem chức năng này' });
+  }
+  next();
+}
+
 // POST /api/orders — khách tạo đơn
 router.post('/', async (req, res) => {
   try {
@@ -120,7 +127,7 @@ router.put('/:id/status', auth, async (req, res) => {
 });
 
 // GET /api/orders/stats — thống kê doanh thu
-router.get('/stats', auth, async (req, res) => {
+router.get('/stats', auth, requireAdmin, async (req, res) => {
   try {
     const { range = 'today', startDate, endDate } = req.query;
     const end = endDate ? new Date(endDate) : new Date();
