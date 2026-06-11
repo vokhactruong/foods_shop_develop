@@ -15,6 +15,7 @@ const orderSchema = new mongoose.Schema(
     items: [orderItemSchema],
     totalAmount: { type: Number, required: true },
     note: { type: String, default: '' },
+    isTakeaway: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ['new', 'doing', 'done', 'served', 'paid', 'cancelled'],

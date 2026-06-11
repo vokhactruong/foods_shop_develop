@@ -26,6 +26,7 @@ export default function App() {
   const [page, setPage] = useState('kitchen');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
   const [soundTested, setSoundTested] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -62,18 +63,34 @@ export default function App() {
   const logout = () => {
     setUser(null);
     localStorage.removeItem('snack_user');
+    setMenuOpen(false);
   };
 
   const showKitchenSoundPrompt = page === 'kitchen' && (!soundEnabled || !soundTested);
+  const selectPage = (nextPage) => {
+    setPage(nextPage);
+    setMenuOpen(false);
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <nav style={{ background: '#111', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', padding: '0 20px', minHeight: 52, gap: 4, flexWrap: 'wrap' }}>
-        <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: 15, marginRight: 20 }}>Snack House</span>
+      <nav className="app-nav">
+        <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: 15, marginRight: 20 }}>Thạch Ngọc Quán</span>
+        <button
+          className="app-nav__menu-button"
+          type="button"
+          onClick={() => setMenuOpen((open) => !open)}
+          aria-expanded={menuOpen}
+          aria-controls="kitchen-nav-menu"
+        >
+          Menu
+        </button>
+
+        <div id="kitchen-nav-menu" className={`app-nav__menu ${menuOpen ? 'app-nav__menu--open' : ''}`}>
         {NAV_ITEMS.map((item) => (
           <button
             key={item.key}
-            onClick={() => setPage(item.key)}
+            onClick={() => selectPage(item.key)}
             style={{
               padding: '6px 14px',
               borderRadius: 8,
@@ -87,11 +104,12 @@ export default function App() {
             {item.label}
           </button>
         ))}
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 13, color: 'var(--text-muted)', marginRight: 12 }}>{user.username}</span>
+        <div className="app-nav__spacer" />
+        <span className="app-nav__user">{user.username}</span>
         <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
           Đăng xuất
         </button>
+        </div>
       </nav>
 
       {page === 'dashboard' && <DashboardPage token={user.token} />}

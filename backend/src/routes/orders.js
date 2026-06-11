@@ -10,7 +10,7 @@ const PAID_STATUSES = ['paid'];
 // POST /api/orders — khách tạo đơn
 router.post('/', async (req, res) => {
   try {
-    const { token, items, note } = req.body;
+    const { token, items, note, isTakeaway } = req.body;
 
     if (!token || !items || !items.length) {
       return res.status(400).json({ message: 'Thiếu thông tin đơn hàng' });
@@ -57,6 +57,7 @@ router.post('/', async (req, res) => {
       items: enrichedItems,
       totalAmount,
       note: note || '',
+      isTakeaway: Boolean(isTakeaway),
       statusHistory: [{ status: 'new' }],
     });
 
@@ -187,7 +188,7 @@ router.get('/stats', auth, async (req, res) => {
         { $sort: { revenue: -1 } },
         { $limit: 5 },
       ]),
-      Order.find(dateFilter).sort({ createdAt: -1 }).limit(5).select('orderNumber tableNumber totalAmount status createdAt').lean(),
+      Order.find(dateFilter).sort({ createdAt: -1 }).limit(5).select('orderNumber tableNumber totalAmount status isTakeaway createdAt').lean(),
     ]);
 
     const revenueTotal = totalRevenue[0]?.total || 0;

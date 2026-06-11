@@ -24,6 +24,96 @@ body {
 button { font-family: inherit; cursor: pointer; }
 input, textarea, select { font-family: inherit; }
 
+.app-nav {
+  background: #111;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  min-height: 52px;
+  gap: 4px;
+  position: relative;
+  z-index: 20;
+}
+
+.app-nav__menu {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.app-nav__menu-button {
+  display: none;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.app-nav__spacer {
+  flex: 1;
+}
+
+.app-nav__user {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-right: 12px;
+}
+
+@media (max-width: 640px) {
+  .app-nav {
+    min-height: 54px;
+    padding: 0 12px;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+  }
+
+  .app-nav__menu-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .app-nav__menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    background: #111;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 12px 12px;
+    box-shadow: 0 14px 28px rgba(0,0,0,0.28);
+  }
+
+  .app-nav__menu--open {
+    display: flex;
+  }
+
+  .app-nav__menu button {
+    width: 100%;
+    min-height: 38px;
+    text-align: left;
+  }
+
+  .app-nav__spacer {
+    display: none;
+  }
+
+  .app-nav__user {
+    margin: 4px 0 0;
+    padding: 6px 2px 0;
+    border-top: 1px solid var(--border);
+  }
+}
+
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }

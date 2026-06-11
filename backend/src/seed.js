@@ -16,7 +16,7 @@ async function seed() {
     { username: 'admin', password: 'admin123', role: 'admin' },
     { username: 'bep', password: 'bep123', role: 'kitchen' },
   ]);
-  console.log('👤 Tạo tài khoản: admin/admin123, bep/bep123');
+  // console.log('👤 Tạo tài khoản: admin/admin123, bep/bep123');
 
   // Tạo menu
   await MenuItem.create([

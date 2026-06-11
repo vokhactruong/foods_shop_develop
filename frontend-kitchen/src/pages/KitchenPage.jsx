@@ -56,6 +56,11 @@ const OrderCard = memo(function OrderCard({
               Chọn
             </label>
           )}
+          {order.isTakeaway && (
+            <div style={{ background: 'rgba(99,153,34,0.15)', color: '#639922', borderRadius: 6, padding: '2px 8px', fontSize: 12, fontWeight: 800 }}>
+              Mang về
+            </div>
+          )}
           <div style={{ background: color + '20', color, borderRadius: 6, padding: '2px 8px', fontSize: 12, fontWeight: 700 }}>
             Bàn {order.tableNumber}
           </div>

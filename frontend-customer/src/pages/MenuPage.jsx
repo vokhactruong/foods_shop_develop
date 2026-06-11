@@ -63,12 +63,13 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
   const cartCount = cartItems.reduce((s, c) => s + c.qty, 0);
   const cartTotal = cartItems.reduce((s, c) => s + c.item.price * c.qty, 0);
 
-  async function handleOrder(note) {
+  async function handleOrder(note, isTakeaway) {
     try {
       setSubmitting(true);
       const orderPayload = {
         token,
         note,
+        isTakeaway,
         items: cartItems.map(({ item, qty }) => ({
           menuItemId: item._id,
           name: item.name,
@@ -92,8 +93,8 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
       {/* Header */}
       <div style={{ background: 'var(--primary)', color: 'white', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: 12, opacity: 0.8 }}>Snack House</div>
-          <div style={{ fontSize: 18, fontWeight: 700 }}>Thực đơn</div>
+          {/* <div style={{ fontSize: 12, opacity: 0.8 }}>Thạch Ngọc Quán</div> */}
+          <div style={{ fontSize: 18, fontWeight: 700 }}>Thạch Ngọc Quán</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 10, padding: '6px 14px', fontSize: 14, fontWeight: 600 }}>
           🪑 Bàn {tableNumber}

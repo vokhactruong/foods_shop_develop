@@ -16,6 +16,12 @@ export default function OrderSuccessPage({ order, tableNumber, onBack }) {
           <span style={{ color: 'var(--text-muted)' }}>Bàn</span>
           <strong>Bàn {tableNumber}</strong>
         </div>
+        {order?.isTakeaway && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12, fontSize: 14 }}>
+            <span style={{ color: 'var(--text-muted)' }}>Hình thức</span>
+            <strong>Mang về</strong>
+          </div>
+        )}
         <div style={{ borderTop: '1px dashed var(--border)', paddingTop: 12, marginBottom: 12 }}>
           {order?.items?.map((it) => (
             <div key={it._id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 6 }}>

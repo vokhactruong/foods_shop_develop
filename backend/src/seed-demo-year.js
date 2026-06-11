@@ -213,7 +213,7 @@ async function seedDemoYear() {
   for (const [month, revenue] of monthlyRevenue.entries()) {
     console.log(`${month}: ${revenue.toLocaleString('vi-VN')} VND`);
   }
-  console.log('Login: admin/admin123 or bep/bep123');
+  // console.log('Login: admin/admin123 or bep/bep123');
 
   await mongoose.disconnect();
 }

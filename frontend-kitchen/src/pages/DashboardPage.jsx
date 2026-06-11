@@ -54,6 +54,8 @@ export default function DashboardPage() {
   const [range, setRange] = useState('today');
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(null);
 
   useEffect(() => {
     loadStats(range);
@@ -64,6 +66,8 @@ export default function DashboardPage() {
       setLoading(true);
       const data = await getStats({ range: nextRange });
       setStats(data);
+      setSelectedDay(null);
+      setSelectedMonth(null);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Không tải được thống kê');
     } finally {
@@ -129,12 +133,23 @@ export default function DashboardPage() {
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: 16, minHeight: 280 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <h3 style={{ fontSize: 15, fontWeight: 800 }}>Doanh thu theo tháng</h3>
-          <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>12 tháng gần nhất</span>
+          <span style={{ color: selectedMonth ? '#639922' : 'var(--text-muted)', fontSize: 12, fontWeight: selectedMonth ? 800 : 400 }}>
+            {selectedMonth ? `${shortMonth(selectedMonth.month)} - ${money(selectedMonth.revenue)}` : '12 tháng gần nhất'}
+          </span>
         </div>
         {stats?.revenueByMonth?.length ? (
           <div style={{ height: 210, display: 'flex', alignItems: 'end', gap: 8, borderBottom: '1px solid var(--border)', paddingBottom: 8, overflowX: 'auto' }}>
             {stats.revenueByMonth.map((month) => (
-              <div key={month.month} title={`${shortMonth(month.month)} - ${money(month.revenue)}`} style={{ flex: 1, minWidth: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+              <div
+                key={month.month}
+                onClick={() => setSelectedMonth(month)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') setSelectedMonth(month);
+                }}
+                style={{ flex: 1, minWidth: 58, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+              >
                 <div
                   style={{
                     width: '100%',
@@ -142,6 +157,8 @@ export default function DashboardPage() {
                     height: `${Math.max((month.revenue / maxMonthlyRevenue) * 150, 6)}px`,
                     background: 'linear-gradient(180deg, #7DA7D9, #639922)',
                     borderRadius: 6,
+                    outline: selectedMonth?.month === month.month ? '2px solid #F5F0EB' : 'none',
+                    outlineOffset: 2,
                   }}
                 />
                 <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>{shortMonth(month.month)}</span>
@@ -157,12 +174,23 @@ export default function DashboardPage() {
         <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 8, padding: 16, minHeight: 280 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
             <h3 style={{ fontSize: 15, fontWeight: 800 }}>Doanh thu theo ngày</h3>
-            <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{stats?.revenueByDay?.length || 0} ngày có doanh thu</span>
+            <span style={{ color: selectedDay ? 'var(--primary)' : 'var(--text-muted)', fontSize: 12, fontWeight: selectedDay ? 800 : 400 }}>
+              {selectedDay ? `${shortDate(selectedDay.date)} - ${money(selectedDay.revenue)}` : `${stats?.revenueByDay?.length || 0} ngày có doanh thu`}
+            </span>
           </div>
           {stats?.revenueByDay?.length ? (
             <div style={{ height: 210, display: 'flex', alignItems: 'end', gap: 8, borderBottom: '1px solid var(--border)', paddingBottom: 8, overflowX: 'auto' }}>
               {stats.revenueByDay.map((day) => (
-                <div key={day.date} title={`${shortDate(day.date)} - ${money(day.revenue)}`} style={{ flex: 1, minWidth: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                <div
+                  key={day.date}
+                  onClick={() => setSelectedDay(day)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setSelectedDay(day);
+                  }}
+                  style={{ flex: 1, minWidth: 36, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+                >
                   <div
                     style={{
                       width: '100%',
@@ -170,6 +198,8 @@ export default function DashboardPage() {
                       height: `${Math.max((day.revenue / maxRevenue) * 150, 6)}px`,
                       background: 'linear-gradient(180deg, #EF9F27, var(--primary))',
                       borderRadius: 6,
+                      outline: selectedDay?.date === day.date ? '2px solid #F5F0EB' : 'none',
+                      outlineOffset: 2,
                     }}
                   />
                   <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>{shortDate(day.date)}</span>

@@ -2,7 +2,7 @@ const router = require('express').Router();
 const crypto = require('crypto');
 const TableSession = require('../models/TableSession');
 
-const EXPIRES_IN_MS = 60 * 1000; // 1 giờ
+const EXPIRES_IN_MS = 60 * 60 * 1000; // 1 giờ
 const EXPIRED_MESSAGE = 'Phiên gọi món đã hết hạn, vui lòng quét lại QR.';
 
 function createToken() {

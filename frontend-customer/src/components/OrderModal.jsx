@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 export default function OrderModal({ cartItems, total, tableNumber, submitting, onConfirm, onClose }) {
   const [note, setNote] = useState('');
+  const [isTakeaway, setIsTakeaway] = useState(false);
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'flex-end', zIndex: 200 }}
@@ -34,10 +35,20 @@ export default function OrderModal({ cartItems, total, tableNumber, submitting, 
           style={{ width: '100%', border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px', fontSize: 14, resize: 'none', marginBottom: 14 }}
         />
 
+        <label style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '10px 12px', border: '1px solid var(--border)', borderRadius: 10, fontSize: 14, fontWeight: 600, marginBottom: 14, cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={isTakeaway}
+            onChange={(e) => setIsTakeaway(e.target.checked)}
+            style={{ width: 18, height: 18, accentColor: 'var(--primary)' }}
+          />
+          Mang về
+        </label>
+
         <div style={{ display: 'flex', gap: 10 }}>
           <button onClick={onClose} style={{ flex: 1, padding: 13, border: '1px solid var(--border)', borderRadius: 12, background: 'white', fontSize: 14, fontWeight: 600 }}>Hủy</button>
           <button
-            onClick={() => onConfirm(note)}
+            onClick={() => onConfirm(note, isTakeaway)}
             disabled={submitting}
             style={{ flex: 2, padding: 13, background: submitting ? '#ccc' : 'var(--primary)', color: 'white', border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700 }}
           >

@@ -24,7 +24,7 @@ export default function LoginPage({ onLogin }) {
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 32, width: '100%', maxWidth: 360 }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>🍿</div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>Snack House</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>Thạch Ngọc Quán</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Đăng nhập để tiếp tục</p>
         </div>
 
@@ -34,7 +34,7 @@ export default function LoginPage({ onLogin }) {
             <input
               value={form.username}
               onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
-              placeholder="admin hoặc bep"
+              placeholder="username"
               style={{ width: '100%', background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 10, padding: '11px 14px', color: 'var(--text)', fontSize: 15 }}
             />
           </div>
@@ -57,9 +57,9 @@ export default function LoginPage({ onLogin }) {
           </button>
         </form>
 
-        <p style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: 'var(--text-muted)' }}>
+        {/* <p style={{ textAlign: 'center', marginTop: 16, fontSize: 12, color: 'var(--text-muted)' }}>
           Demo: admin/admin123 hoặc bep/bep123
-        </p>
+        </p> */}
       </div>
     </div>
   );
