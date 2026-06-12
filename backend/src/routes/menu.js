@@ -1,15 +1,16 @@
-const router = require('express').Router();
+﻿const router = require('express').Router();
 const MenuItem = require('../models/MenuItem');
 const auth = require('../middleware/auth');
+const { notifyStaff } = require('../utils/staffNotifications');
 
 function requireAdmin(req, res, next) {
   if (req.user?.role !== 'admin') {
-    return res.status(403).json({ message: 'Chỉ admin mới được thao tác chức năng này' });
+    return res.status(403).json({ message: 'Chá»‰ admin má»›i Ä‘Æ°á»£c thao tÃ¡c chá»©c nÄƒng nÃ y' });
   }
   next();
 }
 
-// GET /api/menu — public (khách hàng xem menu)
+// GET /api/menu â€” public (khÃ¡ch hÃ ng xem menu)
 router.get('/', async (req, res) => {
   try {
     const { category } = req.query;
@@ -22,7 +23,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/menu/all — admin (bao gồm món đã ẩn)
+// GET /api/menu/all â€” admin (bao gá»“m mÃ³n Ä‘Ã£ áº©n)
 router.get('/all', auth, requireAdmin, async (_req, res) => {
   try {
     const items = await MenuItem.find().sort({ sortOrder: 1, createdAt: 1 }).lean();
@@ -32,7 +33,7 @@ router.get('/all', auth, requireAdmin, async (_req, res) => {
   }
 });
 
-// POST /api/menu — admin thêm món
+// POST /api/menu â€” admin thÃªm mÃ³n
 router.post('/', auth, requireAdmin, async (req, res) => {
   try {
     const item = await MenuItem.create(req.body);
@@ -42,26 +43,41 @@ router.post('/', auth, requireAdmin, async (req, res) => {
   }
 });
 
-// PUT /api/menu/:id — admin sửa món
+// PUT /api/menu/:id - admin sua mon
 router.put('/:id', auth, requireAdmin, async (req, res) => {
   try {
+    const previousItem = await MenuItem.findById(req.params.id).lean();
     const item = await MenuItem.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-    if (!item) return res.status(404).json({ message: 'Không tìm thấy món' });
+    if (!item) return res.status(404).json({ message: 'Khong tim thay mon' });
+
+    if (previousItem?.available && req.body.available === false) {
+      try {
+        await notifyStaff(
+          'Mon da het hang',
+          `${item.name} vua duoc chuyen sang trang thai het hang`,
+          { type: 'out_of_stock', menuItemId: item._id }
+        );
+      } catch (pushError) {
+        console.error('Loi gui thong bao het hang:', pushError);
+      }
+    }
+
     res.json(item);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// DELETE /api/menu/:id — admin xóa món
+// DELETE /api/menu/:id â€” admin xÃ³a mÃ³n
 router.delete('/:id', auth, requireAdmin, async (req, res) => {
   try {
     const item = await MenuItem.findByIdAndDelete(req.params.id);
-    if (!item) return res.status(404).json({ message: 'Không tìm thấy món' });
-    res.json({ message: 'Đã xóa món' });
+    if (!item) return res.status(404).json({ message: 'KhÃ´ng tÃ¬m tháº¥y mÃ³n' });
+    res.json({ message: 'ÄÃ£ xÃ³a mÃ³n' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
 module.exports = router;
+

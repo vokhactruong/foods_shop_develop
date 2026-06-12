@@ -7,10 +7,13 @@ export default defineConfig({
     react(),
     VitePWA({ // 2. Chuyển VitePWA lên nằm trong mảng plugins
       registerType: 'autoUpdate',
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,png,svg,json,ico}'] // Cache toàn bộ tài nguyên cốt lõi
+      },
       manifest: {
-        name: 'Snack Shop',
-        short_name: 'Snack Shop',
-        description: 'Quản lý cửa hàng Snack Shop',
+        name: 'Thạch Ngọc Quán',
+        short_name: 'Thạch Ngọc Quán',
+        description: 'Quản lý cửa hàng Thạch Ngọc Quán',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',

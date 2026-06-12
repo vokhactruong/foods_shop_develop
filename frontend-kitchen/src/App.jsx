@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react';
+﻿import { useEffect, useState } from 'react';
 import LoginPage from './pages/LoginPage';
 import KitchenPage from './pages/KitchenPage';
 import AdminPage from './pages/AdminPage';
 import QRPage from './pages/QRPage';
 import DashboardPage from './pages/DashboardPage';
 import { unlockNotificationSound } from './utils/notificationSound';
+import { requestForToken, onMessageListener } from "./utils/firebase";
+import { saveFcmToken } from './utils/api';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard' },
-  { key: 'kitchen', label: 'Bếp' },
+  { key: 'kitchen', label: 'Báº¿p' },
   { key: 'qr', label: 'QR Code' },
-  { key: 'admin', label: 'Quản lý' },
+  { key: 'admin', label: 'Quáº£n lÃ½' },
 ];
 
 const SOUND_KEY = 'snack_kitchen_sound_enabled';
@@ -60,18 +62,6 @@ export default function App() {
     }
   }
 
-  if (!user) {
-    return (
-      <LoginPage
-        onLogin={(u) => {
-          const session = u?.user ? { ...u.user, token: u.token } : u;
-          setUser(session);
-          localStorage.setItem('snack_user', JSON.stringify(session));
-        }}
-      />
-    );
-  }
-
   const logout = () => {
     setUser(null);
     localStorage.removeItem('snack_user');
@@ -85,11 +75,45 @@ export default function App() {
     setPage(nextPage);
     setMenuOpen(false);
   };
+  useEffect(() => {
+    if (!sessionToken) return undefined;
 
+    let active = true;
+
+    requestForToken()
+      .then((fcmToken) => {
+        if (active && fcmToken) return saveFcmToken(fcmToken);
+        return null;
+      })
+      .catch((error) => {
+        console.error('Khong the luu FCM token:', error);
+      });
+
+    onMessageListener().then((payload) => {
+      if (active && payload?.notification) {
+        alert(`[Thong bao moi]: ${payload.notification.title} - ${payload.notification.body}`);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [sessionToken]);
+  if (!user) {
+    return (
+      <LoginPage
+        onLogin={(u) => {
+          const session = u?.user ? { ...u.user, token: u.token } : u;
+          setUser(session);
+          localStorage.setItem('snack_user', JSON.stringify(session));
+        }}
+      />
+    );
+  }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <nav className="app-nav">
-        <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: 15, marginRight: 20 }}>Thạch Ngọc Quán</span>
+        <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: 15, marginRight: 20 }}>Tháº¡ch Ngá»c QuÃ¡n</span>
         <button
           className="app-nav__menu-button"
           type="button"
@@ -121,7 +145,7 @@ export default function App() {
         <div className="app-nav__spacer" />
         <span className="app-nav__user">{account?.username}</span>
         <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
-          Đăng xuất
+          ÄÄƒng xuáº¥t
         </button>
         </div>
       </nav>
@@ -144,9 +168,9 @@ export default function App() {
           }}
         >
           <div style={{ width: '100%', maxWidth: 420, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Bật âm thanh thông báo</div>
+            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Báº­t Ã¢m thanh thÃ´ng bÃ¡o</div>
             <div style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
-              Bật âm thanh để khi có đơn mới, bếp sẽ phát file <code>/notification.mp3</code>.
+              Báº­t Ã¢m thanh Ä‘á»ƒ khi cÃ³ Ä‘Æ¡n má»›i, báº¿p sáº½ phÃ¡t file <code>/notification.mp3</code>.
             </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button
@@ -156,13 +180,13 @@ export default function App() {
                 }}
                 style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, fontWeight: 700 }}
               >
-                Không bật
+                KhÃ´ng báº­t
               </button>
               <button
                 onClick={enableSound}
                 style={{ padding: '9px 14px', borderRadius: 8, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 13, fontWeight: 800 }}
               >
-                Bật âm thanh
+                Báº­t Ã¢m thanh
               </button>
             </div>
           </div>
@@ -171,3 +195,4 @@ export default function App() {
     </div>
   );
 }
+

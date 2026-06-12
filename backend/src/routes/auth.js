@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // POST /api/auth/login
 router.post('/login', async (req, res) => {
@@ -36,6 +37,20 @@ router.post('/register', async (req, res) => {
 
     const user = await User.create({ username, password, role: role || 'kitchen' });
     res.status(201).json({ message: 'Tạo tài khoản thành công', user: { id: user._id, username: user.username, role: user.role } });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.post('/fcm-token', auth, async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ message: 'FCM token khong hop le' });
+    }
+
+    await User.findByIdAndUpdate(req.user.id, { $addToSet: { fcmTokens: token } });
+    res.json({ message: 'Da luu FCM token' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

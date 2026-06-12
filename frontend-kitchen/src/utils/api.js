@@ -12,6 +12,7 @@ api.interceptors.request.use((config) => {
 });
 
 export const login = (data) => api.post('/auth/login', data).then((r) => r.data);
+export const saveFcmToken = (token) => api.post('/auth/fcm-token', { token }).then((r) => r.data);
 export const getOrders = (params) => api.get('/orders', { params }).then((r) => r.data);
 export const updateOrderStatus = (id, status) => api.put(`/orders/${id}/status`, { status }).then((r) => r.data);
 export const getStats = (params) => api.get('/orders/stats', { params }).then((r) => r.data);
