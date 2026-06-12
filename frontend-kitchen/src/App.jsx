@@ -29,6 +29,7 @@ export default function App() {
   const [page, setPage] = useState('kitchen');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
   const [soundTested, setSoundTested] = useState(false);
+  const [pushStatus, setPushStatus] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const account = user?.user || user;
   const sessionToken = user?.token || account?.token;
@@ -68,6 +69,19 @@ export default function App() {
     setMenuOpen(false);
   };
 
+  const enablePushNotifications = async () => {
+    try {
+      setPushStatus('Dang bat...');
+      const fcmToken = await requestForToken();
+      await saveFcmToken(fcmToken);
+      setPushStatus('Da bat');
+      alert('Da luu FCM token cho thiet bi nay.');
+    } catch (error) {
+      setPushStatus('Loi');
+      alert(`Khong lay/luu duoc FCM token: ${error.message}`);
+    }
+  };
+
   const showKitchenSoundPrompt = page === 'kitchen' && (!soundEnabled || !soundTested);
   const navItems = isAdmin ? NAV_ITEMS : NAV_ITEMS.filter((item) => !ADMIN_PAGES.includes(item.key));
   const selectPage = (nextPage) => {
@@ -79,15 +93,6 @@ export default function App() {
     if (!sessionToken) return undefined;
 
     let active = true;
-
-    requestForToken()
-      .then((fcmToken) => {
-        if (active && fcmToken) return saveFcmToken(fcmToken);
-        return null;
-      })
-      .catch((error) => {
-        console.error('Khong the luu FCM token:', error);
-      });
 
     onMessageListener().then((payload) => {
       if (active && payload?.notification) {
@@ -123,7 +128,9 @@ export default function App() {
         >
           Menu
         </button>
+        
 
+        
         <div id="kitchen-nav-menu" className={`app-nav__menu ${menuOpen ? 'app-nav__menu--open' : ''}`}>
         {navItems.map((item) => (
           <button
@@ -144,6 +151,9 @@ export default function App() {
         ))}
         <div className="app-nav__spacer" />
         <span className="app-nav__user">{account?.username}</span>
+        <button onClick={enablePushNotifications} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
+          {pushStatus || 'Bat thong bao'}
+        </button>
         <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
           ÄÄƒng xuáº¥t
         </button>
