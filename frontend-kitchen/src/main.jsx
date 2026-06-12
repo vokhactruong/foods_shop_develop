@@ -3,7 +3,11 @@ import ReactDOM from 'react-dom/client';
 import { Toaster } from 'react-hot-toast';
 import App from './App';
 import './index.css';
+import { registerSW } from 'virtual:pwa-register'
 
+registerSW({
+  immediate: true
+})
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <App />
