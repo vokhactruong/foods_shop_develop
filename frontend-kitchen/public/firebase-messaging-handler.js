@@ -1,14 +1,17 @@
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging-compat.js');
+importScripts('/firebase-config.js');
+
+const firebaseEnv = self.FOODS_SHOP_FIREBASE_CONFIG;
 
 firebase.initializeApp({
-  apiKey: 'AIzaSyCj3vtkejVlyDSEKKzx6aLPYpbyZAMDfXo',
-  authDomain: 'foods-shop-9ba1a.firebaseapp.com',
-  projectId: 'foods-shop-9ba1a',
-  storageBucket: 'foods-shop-9ba1a.firebasestorage.app',
-  messagingSenderId: '673983193612',
-  appId: '1:673983193612:web:f936f1315340e2c3b08429',
-  measurementId: 'G-K33FXKHLJN',
+  apiKey: firebaseEnv.VITE_FIREBASE_API_KEY,
+  authDomain: firebaseEnv.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: firebaseEnv.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: firebaseEnv.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: firebaseEnv.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: firebaseEnv.VITE_FIREBASE_APP_ID,
+  measurementId: firebaseEnv.VITE_FIREBASE_MEASUREMENT_ID,
 });
 
 const messaging = firebase.messaging();

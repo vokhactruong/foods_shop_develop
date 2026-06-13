@@ -13,6 +13,7 @@ build/
 .env.*
 !.env.example
 *-firebase-adminsdk-*.json
+frontend-kitchen/public/firebase-config.js
 
 # Logs
 *.log

@@ -1,14 +1,29 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, isSupported, onMessage } from 'firebase/messaging';
 
+const requiredFirebaseEnvVars = [
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_AUTH_DOMAIN',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_STORAGE_BUCKET',
+  'VITE_FIREBASE_MESSAGING_SENDER_ID',
+  'VITE_FIREBASE_APP_ID',
+  'VITE_FIREBASE_VAPID_KEY',
+];
+
+const missingFirebaseEnvVars = requiredFirebaseEnvVars.filter((key) => !import.meta.env[key]);
+if (missingFirebaseEnvVars.length) {
+  throw new Error(`Missing Firebase env vars: ${missingFirebaseEnvVars.join(', ')}`);
+}
+
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || 'AIzaSyCj3vtkejVlyDSEKKzx6aLPYpbyZAMDfXo',
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || 'foods-shop-9ba1a.firebaseapp.com',
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || 'foods-shop-9ba1a',
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || 'foods-shop-9ba1a.firebasestorage.app',
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '673983193612',
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || '1:673983193612:web:f936f1315340e2c3b08429',
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || 'G-K33FXKHLJN',
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 const app = initializeApp(firebaseConfig);
@@ -62,9 +77,7 @@ export const requestForToken = async () => {
 
     const serviceWorkerRegistration = await getActiveServiceWorkerRegistration();
     const token = await getToken(messaging, {
-      vapidKey:
-        import.meta.env.VITE_FIREBASE_VAPID_KEY ||
-        'BLS98wbOImD8QnLQjCjARoNBwT3MWJwFIvbcJDk4WNBueeheXrTXMPWfiF9Ow-Iz4QmIf9dMUIc5Za4Oa9OjNhk',
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
       serviceWorkerRegistration,
     });
 
