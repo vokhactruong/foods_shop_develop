@@ -14,6 +14,8 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 messaging.onBackgroundMessage((payload) => {
+  if (payload.notification) return;
+
   const title = payload.notification?.title || payload.data?.title || 'Thong bao moi';
   const options = {
     body: payload.notification?.body || payload.data?.body || '',
