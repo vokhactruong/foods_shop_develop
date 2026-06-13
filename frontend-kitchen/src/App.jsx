@@ -28,7 +28,6 @@ export default function App() {
   });
   const [page, setPage] = useState('kitchen');
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
-  const [soundTested, setSoundTested] = useState(false);
   const [pushStatus, setPushStatus] = useState('');
   const [pushBusy, setPushBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -51,23 +50,25 @@ export default function App() {
     }
   }, [user, isAdmin, page]);
 
-  async function enableSound() {
-    try {
-      await unlockNotificationSound();
-      localStorage.setItem(SOUND_KEY, 'true');
-      setSoundEnabled(true);
-      setSoundTested(true);
-    } catch {
-      localStorage.setItem(SOUND_KEY, 'true');
-      setSoundEnabled(true);
-      setSoundTested(true);
-    }
-  }
-
   const logout = () => {
     setUser(null);
     localStorage.removeItem('snack_user');
     setMenuOpen(false);
+  };
+
+  const toggleSound = async () => {
+    if (soundEnabled) {
+      localStorage.setItem(SOUND_KEY, 'false');
+      setSoundEnabled(false);
+      return;
+    }
+
+    try {
+      await unlockNotificationSound();
+    } catch {}
+
+    localStorage.setItem(SOUND_KEY, 'true');
+    setSoundEnabled(true);
   };
 
   const enablePushNotifications = async () => {
@@ -88,7 +89,6 @@ export default function App() {
     }
   };
 
-  const showKitchenSoundPrompt = page === 'kitchen' && (!soundEnabled || !soundTested);
   const navItems = isAdmin ? NAV_ITEMS : NAV_ITEMS.filter((item) => !ADMIN_PAGES.includes(item.key));
   const selectPage = (nextPage) => {
     if (ADMIN_PAGES.includes(nextPage) && !isAdmin) return;
@@ -168,6 +168,9 @@ export default function App() {
         <button disabled={pushBusy} onClick={enablePushNotifications} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, opacity: pushBusy ? 0.65 : 1 }}>
           {pushStatus || 'Bat thong bao'}
         </button>
+        <button onClick={toggleSound} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: soundEnabled ? 'var(--primary)' : 'transparent', color: soundEnabled ? 'white' : 'var(--text-muted)', fontSize: 13 }}>
+          {soundEnabled ? 'Tat am thanh' : 'Bat am thanh'}
+        </button>
         <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
           ÄÄƒng xuáº¥t
         </button>
@@ -179,43 +182,6 @@ export default function App() {
       {page === 'qr' && <QRPage token={sessionToken} />}
       {page === 'admin' && isAdmin && <AdminPage token={sessionToken} />}
 
-      {showKitchenSoundPrompt && (
-        <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.72)',
-            display: 'grid',
-            placeItems: 'center',
-            zIndex: 50,
-            padding: 20,
-          }}
-        >
-          <div style={{ width: '100%', maxWidth: 420, background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 12, padding: 20 }}>
-            <div style={{ fontSize: 18, fontWeight: 800, marginBottom: 8 }}>Báº­t Ã¢m thanh thÃ´ng bÃ¡o</div>
-            <div style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
-              Báº­t Ã¢m thanh Ä‘á»ƒ khi cÃ³ Ä‘Æ¡n má»›i, báº¿p sáº½ phÃ¡t file <code>/notification.mp3</code>.
-            </div>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button
-                onClick={() => {
-                  localStorage.setItem(SOUND_KEY, 'true');
-                  setSoundEnabled(true);
-                }}
-                style={{ padding: '9px 14px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, fontWeight: 700 }}
-              >
-                KhÃ´ng báº­t
-              </button>
-              <button
-                onClick={enableSound}
-                style={{ padding: '9px 14px', borderRadius: 8, border: 'none', background: 'var(--primary)', color: 'white', fontSize: 13, fontWeight: 800 }}
-              >
-                Báº­t Ã¢m thanh
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
