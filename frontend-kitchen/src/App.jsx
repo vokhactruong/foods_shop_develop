@@ -10,9 +10,9 @@ import { saveFcmToken } from './utils/api';
 
 const NAV_ITEMS = [
   { key: 'dashboard', label: 'Dashboard' },
-  { key: 'kitchen', label: 'Báº¿p' },
+  { key: 'kitchen', label: 'Bếp' },
   { key: 'qr', label: 'QR Code' },
-  { key: 'admin', label: 'Quáº£n lÃ½' },
+  { key: 'admin', label: 'Quản lý' },
 ];
 
 const SOUND_KEY = 'snack_kitchen_sound_enabled';
@@ -76,13 +76,13 @@ export default function App() {
 
     try {
       setPushBusy(true);
-      setPushStatus('Dang bat...');
+      setPushStatus('Đang bật...');
       const fcmToken = await requestForToken();
       await saveFcmToken(fcmToken);
-      setPushStatus('Da bat');
-      alert('Da luu FCM token cho thiet bi nay.');
+      setPushStatus('Đã bật');
+      alert('Đã bật thông báo cho thiết bị');
     } catch (error) {
-      setPushStatus('Loi');
+      setPushStatus('Lỗi');
       alert(`Khong lay/luu duoc FCM token: ${error.message}`);
     } finally {
       setPushBusy(false);
@@ -108,7 +108,7 @@ export default function App() {
         await showSystemNotification(payload);
       } catch {
         if (payload.notification) {
-          alert(`[Thong bao moi]: ${payload.notification.title} - ${payload.notification.body}`);
+          alert(`[Thông báo mới]: ${payload.notification.title} - ${payload.notification.body}`);
         }
       }
     }).then((cleanup) => {
@@ -166,13 +166,13 @@ export default function App() {
         <div className="app-nav__spacer" />
         <span className="app-nav__user">{account?.username}</span>
         <button disabled={pushBusy} onClick={enablePushNotifications} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, opacity: pushBusy ? 0.65 : 1 }}>
-          {pushStatus || 'Bat thong bao'}
+          {pushStatus || 'Bật thông báo'}
         </button>
         <button onClick={toggleSound} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: soundEnabled ? 'var(--primary)' : 'transparent', color: soundEnabled ? 'white' : 'var(--text-muted)', fontSize: 13 }}>
-          {soundEnabled ? 'Tat am thanh' : 'Bat am thanh'}
+          {soundEnabled ? 'Tắt âm thanh' : 'Bật âm thanh'}
         </button>
         <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
-          ÄÄƒng xuáº¥t
+          Đăng xuất
         </button>
         </div>
       </nav>

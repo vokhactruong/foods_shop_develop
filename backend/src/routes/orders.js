@@ -39,7 +39,7 @@ router.post('/', async (req, res) => {
     if (!session || session.expiresAt <= new Date()) {
 
       if (session?._id) await TableSession.deleteOne({ _id: session._id });
-      return res.status(403).json({ message: 'PhiÃªn gá»i mÃ³n Ä‘Ã£ háº¿t háº¡n, vui lÃ²ng quÃ©t láº¡i QR.', code: 'SessionExpired' });
+      return res.status(403).json({ message: 'Phiên đăng nhập hết hạn, vui lòng quét lại mã QR để gọi món.', code: 'SessionExpired' });
     }
 
 
@@ -77,8 +77,8 @@ router.post('/', async (req, res) => {
     // Gá»­i thÃ´ng bÃ¡o Ä‘áº©y FCM tá»›i báº¿p khi cÃ³ Ä‘Æ¡n má»›i
     try {
       await notifyStaff(
-        'Co don hang moi',
-        `Ban ${session.tableNumber} vua goi mon. Tong: ${totalAmount.toLocaleString('vi-VN')}d`,
+        'Có đơn hàng mới',
+        `Bàn ${session.tableNumber} vừa gọi món. Tổng: ${totalAmount.toLocaleString('vi-VN')}d`,
         { type: 'new_order', orderId: order._id, tableNumber: session.tableNumber }
       );
     } catch (pushError) {
@@ -137,8 +137,8 @@ router.put('/:id/status', auth, async (req, res) => {
     if (status === 'paid') {
       try {
         await notifyStaff(
-          'Thanh toan thanh cong',
-          `Don ${order.orderNumber || order._id} da thanh toan ${order.totalAmount.toLocaleString('vi-VN')}d`,
+          'Thanh toán thành công',
+          `Đơn ${order.orderNumber || order._id} đã thanh toán ${order.totalAmount.toLocaleString('vi-VN')}d`,
           { type: 'payment_success', orderId: order._id }
         );
       } catch (pushError) {
