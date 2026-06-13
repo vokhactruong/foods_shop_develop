@@ -190,6 +190,38 @@ export default function KitchenPage({ soundEnabled = false }) {
     loadOrders();
   }, []);
 
+  useEffect(() => {
+    const refreshOrders = () => {
+      loadOrders();
+    };
+
+    const handleServiceWorkerMessage = (event) => {
+      if (event.data?.type === 'REFRESH_ORDERS_NOW') {
+        refreshOrders();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshOrders();
+      }
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', refreshOrders);
+
+    return () => {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', refreshOrders);
+    };
+  }, []);
+
   async function loadOrders() {
     try {
       const data = await getOrders({ status: 'all' });

@@ -27,3 +27,29 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(title, options);
 });
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const urlToOpen = new URL('/', self.location.origin).href;
+
+  const promiseChain = clients
+    .matchAll({
+      type: 'window',
+      includeUncontrolled: true,
+    })
+    .then((windowClients) => {
+      const matchingClient = windowClients.find((windowClient) => {
+        return windowClient.url === urlToOpen || windowClient.url.includes(self.location.origin);
+      });
+
+      if (matchingClient) {
+        matchingClient.focus();
+        return matchingClient.postMessage({ type: 'REFRESH_ORDERS_NOW' });
+      }
+
+      return clients.openWindow(urlToOpen);
+    });
+
+  event.waitUntil(promiseChain);
+});
