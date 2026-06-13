@@ -78,7 +78,7 @@ router.post('/', async (req, res) => {
     try {
       await notifyStaff(
         'Có đơn hàng mới',
-        `Bàn ${session.tableNumber} vừa gọi món. Tổng: ${totalAmount.toLocaleString('vi-VN')}d`,
+        `Bàn ${session.tableNumber} vừa gọi món. Tổng: ${totalAmount.toLocaleString('vi-VN')}đ`,
         { type: 'new_order', orderId: order._id, tableNumber: session.tableNumber }
       );
     } catch (pushError) {
