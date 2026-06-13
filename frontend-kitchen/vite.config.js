@@ -1,19 +1,20 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { VitePWA } from 'vite-plugin-pwa'; // 1. Phải import cái này vào
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
   plugins: [
     react(),
-    VitePWA({ // 2. Chuyển VitePWA lên nằm trong mảng plugins
+    VitePWA({
       registerType: 'autoUpdate',
       workbox: {
-        globPatterns: ['**/*.{js,css,html,png,svg,json,ico}'] // Cache toàn bộ tài nguyên cốt lõi
+        globPatterns: ['**/*.{js,css,html,png,svg,json,ico}'],
+        importScripts: ['firebase-messaging-handler.js'],
       },
       manifest: {
-        name: 'Thạch Ngọc Quán',
-        short_name: 'Thạch Ngọc Quán',
-        description: 'Quản lý cửa hàng Thạch Ngọc Quán',
+        name: 'Thach Ngoc Quan',
+        short_name: 'Thach Ngoc Quan',
+        description: 'Quan ly cua hang Thach Ngoc Quan',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
@@ -21,24 +22,24 @@ export default defineConfig({
           {
             src: '/icon-192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: '/icon-512.png',
             sizes: '512x512',
-            type: 'image/png'
-          }
-        ]
-      }
-    })
+            type: 'image/png',
+          },
+        ],
+      },
+    }),
   ],
   server: {
     port: 5174,
-    proxy: { // 3. Trong server bây giờ chỉ giữ lại port và proxy sạch sẽ như này
+    proxy: {
       '/api': 'http://localhost:5000',
-      '/socket.io': { 
-        target: 'http://localhost:5000', 
-        ws: true 
+      '/socket.io': {
+        target: 'http://localhost:5000',
+        ws: true,
       },
     },
   },

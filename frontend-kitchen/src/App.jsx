@@ -5,7 +5,7 @@ import AdminPage from './pages/AdminPage';
 import QRPage from './pages/QRPage';
 import DashboardPage from './pages/DashboardPage';
 import { unlockNotificationSound } from './utils/notificationSound';
-import { requestForToken, onMessageListener } from "./utils/firebase";
+import { requestForToken, showSystemNotification, subscribeToForegroundMessages } from "./utils/firebase";
 import { saveFcmToken } from './utils/api';
 
 const NAV_ITEMS = [
@@ -30,6 +30,7 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(() => localStorage.getItem(SOUND_KEY) === 'true');
   const [soundTested, setSoundTested] = useState(false);
   const [pushStatus, setPushStatus] = useState('');
+  const [pushBusy, setPushBusy] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const account = user?.user || user;
   const sessionToken = user?.token || account?.token;
@@ -70,7 +71,10 @@ export default function App() {
   };
 
   const enablePushNotifications = async () => {
+    if (pushBusy) return;
+
     try {
+      setPushBusy(true);
       setPushStatus('Dang bat...');
       const fcmToken = await requestForToken();
       await saveFcmToken(fcmToken);
@@ -79,6 +83,8 @@ export default function App() {
     } catch (error) {
       setPushStatus('Loi');
       alert(`Khong lay/luu duoc FCM token: ${error.message}`);
+    } finally {
+      setPushBusy(false);
     }
   };
 
@@ -92,16 +98,26 @@ export default function App() {
   useEffect(() => {
     if (!sessionToken) return undefined;
 
+    let unsubscribe = () => {};
     let active = true;
 
-    onMessageListener().then((payload) => {
-      if (active && payload?.notification) {
-        alert(`[Thong bao moi]: ${payload.notification.title} - ${payload.notification.body}`);
+    subscribeToForegroundMessages(async (payload) => {
+      if (!active || !payload) return;
+
+      try {
+        await showSystemNotification(payload);
+      } catch {
+        if (payload.notification) {
+          alert(`[Thong bao moi]: ${payload.notification.title} - ${payload.notification.body}`);
+        }
       }
+    }).then((cleanup) => {
+      unsubscribe = cleanup;
     });
 
     return () => {
       active = false;
+      unsubscribe();
     };
   }, [sessionToken]);
   if (!user) {
@@ -149,7 +165,7 @@ export default function App() {
         ))}
         <div className="app-nav__spacer" />
         <span className="app-nav__user">{account?.username}</span>
-        <button onClick={enablePushNotifications} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>
+        <button disabled={pushBusy} onClick={enablePushNotifications} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13, opacity: pushBusy ? 0.65 : 1 }}>
           {pushStatus || 'Bat thong bao'}
         </button>
         <button onClick={logout} style={{ padding: '5px 12px', borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text-muted)', fontSize: 13 }}>

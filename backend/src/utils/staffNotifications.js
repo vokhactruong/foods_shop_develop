@@ -10,7 +10,10 @@ async function notifyStaff(title, body, data = {}) {
     .lean();
 
   const tokens = users.flatMap((user) => user.fcmTokens || []);
+  console.log(`[FCM] Sending "${title}" to ${tokens.length} staff token(s).`);
+
   const result = await sendPushNotification(tokens, title, body, data);
+  console.log(`[FCM] Result: success=${result.successCount || 0}, failure=${result.failureCount || 0}`);
 
   if (result.invalidTokens?.length) {
     await User.updateMany(

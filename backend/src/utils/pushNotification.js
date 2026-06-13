@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const admin = require('firebase-admin');
+const { cert, getApps, initializeApp } = require('firebase-admin/app');
+const { getMessaging } = require('firebase-admin/messaging');
 
 let initialized = false;
 
@@ -22,7 +23,7 @@ function readServiceAccount() {
 }
 
 function ensureFirebaseAdmin() {
-  if (initialized || admin.apps.length) {
+  if (initialized || getApps().length) {
     initialized = true;
     return true;
   }
@@ -30,8 +31,8 @@ function ensureFirebaseAdmin() {
   const serviceAccount = readServiceAccount();
   if (!serviceAccount) return false;
 
-  admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+  initializeApp({
+    credential: cert(serviceAccount),
   });
   initialized = true;
   return true;
@@ -43,16 +44,27 @@ async function sendPushNotification(tokens, title, body, data = {}) {
     return { successCount: 0, failureCount: 0, invalidTokens: [] };
   }
 
-  const response = await admin.messaging().sendEachForMulticast({
+  const response = await getMessaging().sendEachForMulticast({
     tokens: tokenList,
     notification: { title, body },
     data: Object.fromEntries(Object.entries(data).map(([key, value]) => [key, String(value)])),
     webpush: {
       notification: {
+        title,
+        body,
         icon: '/icon-192.png',
         badge: '/icon-192.png',
       },
+      fcmOptions: {
+        link: '/',
+      },
     },
+  });
+
+  response.responses.forEach((item, index) => {
+    if (!item.success) {
+      console.error(`[FCM] Token ${index + 1}/${tokenList.length} failed:`, item.error?.code, item.error?.message);
+    }
   });
 
   const invalidTokens = response.responses
