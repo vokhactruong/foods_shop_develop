@@ -93,8 +93,8 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
       {/* Header */}
       <div style={{ background: 'var(--primary)', color: 'white', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          {/* <div style={{ fontSize: 12, opacity: 0.8 }}>Ngọc Thạch Quán</div> */}
-          <div style={{ fontSize: 18, fontWeight: 700 }}>Ngọc Thạch Quán</div>
+          {/* <div style={{ fontSize: 12, opacity: 0.8 }}>Thạch Ngọc Quán</div> */}
+          <div style={{ fontSize: 18, fontWeight: 700 }}>Thạch Ngọc Quán</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 10, padding: '6px 14px', fontSize: 14, fontWeight: 600 }}>
           🪑 Bàn {tableNumber}

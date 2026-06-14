@@ -36,7 +36,7 @@ export default function QRPage() {
     win.document.write(`
       <html><head><title>QR Bàn ${table.number}</title></head>
       <body style="text-align:center;font-family:sans-serif;padding:40px">
-        <h2 style="font-size:32px;margin-bottom:8px">🍿 Ngọc Thạch Quán</h2>
+        <h2 style="font-size:32px;margin-bottom:8px">🍿 Thạch Ngọc Quán</h2>
         <h3 style="color:#D85A30;font-size:24px;margin-bottom:20px">Bàn ${table.number}</h3>
         <img src="${table.qrDataUrl}" width="260" style="margin-bottom:16px"/>
         <p style="font-size:14px;color:#888">Quét để đặt món</p>

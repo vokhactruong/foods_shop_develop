@@ -12,9 +12,9 @@ export default defineConfig({
         importScripts: ['firebase-messaging-handler.js'],
       },
       manifest: {
-        name: 'Ngọc Thạch Quán',
-        short_name: 'Ngọc Thạch Quán',
-        description: 'Quản lý cửa hàng Ngọc Thạch Quán',
+        name: 'Thạch Ngọc Quán',
+        short_name: 'Thạch Ngọc Quán',
+        description: 'Quản lý cửa hàng Thạch Ngọc Quán',
         theme_color: '#ffffff',
         background_color: '#ffffff',
         display: 'standalone',
