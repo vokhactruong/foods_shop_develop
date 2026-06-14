@@ -134,7 +134,7 @@ export default function App() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <nav className="app-nav">
-        <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: 15, marginRight: 20 }}>Thạch Ngọc Quán</span>
+        <span style={{ color: 'var(--primary)', fontWeight: 800, fontSize: 15, marginRight: 20 }}>Ngọc Thạch Quán</span>
         <button
           className="app-nav__menu-button"
           type="button"
