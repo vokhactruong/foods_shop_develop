@@ -1,13 +1,10 @@
-const BG_MAP = {
-  che: '#E8F5E9',
-  suachua: '#FCE4EC',
-  caramen: '#EFEBE9',
-  monmoi: '#FFF9C4',
-  douong: '#E0F2F1',
-  doanutat: '#FFE0B2',
-  pizza: '#FFEBEE',
-  mycay: '#FFCCBC',
-};
+const CARD_BACKGROUNDS = ['#E8F5E9', '#FCE4EC', '#EFEBE9', '#FFF9C4', '#E0F2F1', '#FFE0B2', '#FFEBEE', '#FFCCBC'];
+
+function categoryBackground(category) {
+  const value = String(category || '');
+  const index = [...value].reduce((sum, char) => sum + char.charCodeAt(0), 0) % CARD_BACKGROUNDS.length;
+  return CARD_BACKGROUNDS[index] || '#F5EEE8';
+}
 
 export default function MenuCard({ item, qty, onAdd, onUpdateQty }) {
   return (
@@ -25,7 +22,7 @@ export default function MenuCard({ item, qty, onAdd, onUpdateQty }) {
       <div
         style={{
           flex: '0 0 67%',
-          background: BG_MAP[item.category] || '#F5EEE8',
+          background: categoryBackground(item.category),
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

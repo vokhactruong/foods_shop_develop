@@ -1,25 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
-import { getMenu, placeOrder } from '../utils/api';
+import { getCategories, getMenu, placeOrder } from '../utils/api';
 import MenuCard from '../components/MenuCard';
 import CartBar from '../components/CartBar';
 import OrderModal from '../components/OrderModal';
 
-const CATEGORIES = [
-  { id: 'all', label: 'Tất cả', icon: '📋' },
-  { id: 'che', label: 'Chè', icon: '🍵' },
-  { id: 'suachua', label: 'Sữa Chua', icon: '🥛' },
-  { id: 'caramen', label: 'Caramen', icon: '🍮' },
-  { id: 'monmoi', label: 'Món Mới', icon: '✨' },
-  { id: 'douong', label: 'Đồ Uống', icon: '🧋' },
-  { id: 'doanutat', label: 'Ăn Vặt', icon: '🧀' },
-  { id: 'pizza', label: 'Pizza', icon: '🍕' },
-  { id: 'mycay', label: 'Mỳ Cay', icon: '🌶️' },
-];
+const ALL_CATEGORY = { key: 'all', label: 'Tất cả', icon: '📋' };
 
 export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
-
   const [menu, setMenu] = useState([]);
+  const [categories, setCategories] = useState([ALL_CATEGORY]);
   const [loading, setLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('all');
   const [cart, setCart] = useState({});
@@ -27,8 +17,21 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
     loadMenu();
   }, [activeCategory]);
+
+  async function loadCategories() {
+    try {
+      const data = await getCategories();
+      setCategories([ALL_CATEGORY, ...data]);
+    } catch {
+      toast.error('Khong tai duoc danh muc');
+    }
+  }
 
   async function loadMenu() {
     try {
@@ -36,7 +39,7 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
       const data = await getMenu(activeCategory);
       setMenu(data);
     } catch {
-      toast.error('Không tải được menu, thử lại sau');
+      toast.error('Khong tai duoc menu, thu lai sau');
     } finally {
       setLoading(false);
     }
@@ -44,7 +47,7 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
 
   function addToCart(item) {
     setCart((prev) => ({ ...prev, [item._id]: { item, qty: (prev[item._id]?.qty || 0) + 1 } }));
-    toast.success(`Đã thêm ${item.name}`);
+    toast.success(`Da them ${item.name}`);
   }
 
   function updateQty(itemId, delta) {
@@ -60,8 +63,8 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
   }
 
   const cartItems = Object.values(cart).filter((c) => c.qty > 0);
-  const cartCount = cartItems.reduce((s, c) => s + c.qty, 0);
-  const cartTotal = cartItems.reduce((s, c) => s + c.item.price * c.qty, 0);
+  const cartCount = cartItems.reduce((sum, cartItem) => sum + cartItem.qty, 0);
+  const cartTotal = cartItems.reduce((sum, cartItem) => sum + cartItem.item.price * cartItem.qty, 0);
 
   async function handleOrder(note, isTakeaway) {
     try {
@@ -82,7 +85,7 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
       setShowModal(false);
       onOrderPlaced(order);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Đặt món thất bại, thử lại');
+      toast.error(err.response?.data?.message || 'Dat mon that bai, thu lai');
     } finally {
       setSubmitting(false);
     }
@@ -90,42 +93,40 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100dvh' }}>
-      {/* Header */}
       <div style={{ background: 'var(--primary)', color: 'white', padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          {/* <div style={{ fontSize: 12, opacity: 0.8 }}>Thạch Ngọc Quán</div> */}
-          <div style={{ fontSize: 18, fontWeight: 700 }}>Thạch Ngọc Quán</div>
+          <div style={{ fontSize: 18, fontWeight: 700 }}>Phở Lợi Hương</div>
         </div>
         <div style={{ background: 'rgba(255,255,255,0.2)', borderRadius: 10, padding: '6px 14px', fontSize: 14, fontWeight: 600 }}>
-          🪑 Bàn {tableNumber}
+          Bàn {tableNumber}
         </div>
       </div>
 
-      {/* Category tabs */}
       <div style={{ display: 'flex', gap: 8, padding: '10px 12px', overflowX: 'auto', background: 'white', borderBottom: '1px solid var(--border)', flexShrink: 0 }}>
-        {CATEGORIES.map((cat) => (
+        {categories.map((cat) => (
           <button
-            key={cat.id}
-            onClick={() => setActiveCategory(cat.id)}
+            key={cat.key}
+            onClick={() => setActiveCategory(cat.key)}
             style={{
               flexShrink: 0,
               padding: '7px 14px',
               borderRadius: 20,
-              border: activeCategory === cat.id ? 'none' : '1px solid var(--border)',
-              background: activeCategory === cat.id ? 'var(--primary)' : 'white',
-              color: activeCategory === cat.id ? 'white' : 'var(--text-muted)',
+              border: activeCategory === cat.key ? 'none' : '1px solid var(--border)',
+              background: activeCategory === cat.key ? 'var(--primary)' : 'white',
+              color: activeCategory === cat.key ? 'white' : 'var(--text-muted)',
               fontSize: 13,
               fontWeight: 600,
-              display: 'flex', alignItems: 'center', gap: 5,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 5,
             }}
           >
-            {cat.icon} {cat.label}
+            {cat.icon ? `${cat.icon} ` : ''}{cat.label}
           </button>
         ))}
       </div>
 
-      {/* Menu grid */}
-      <div style={{ flex: 1, padding: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, overflowY: 'auto', paddingBottom: cartCount > 0 ? 90 : 12 }}>
+      <div style={{ padding: '12px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, overflowY: 'auto', paddingBottom: cartCount > 0 ? 90 : 12 }}>
         {loading
           ? Array(6).fill(0).map((_, i) => (
               <div key={i} style={{ height: 170, background: '#F5EEE8', borderRadius: 'var(--radius)', animation: 'pulse 1.4s infinite' }} />
@@ -146,14 +147,10 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
         )}
       </div>
 
-      {/* Cart bar */}
       {cartCount > 0 && (
         <CartBar count={cartCount} total={cartTotal} onOrder={() => setShowModal(true)} />
       )}
 
-
-
-      {/* Order modal */}
       {showModal && (
         <OrderModal
           cartItems={cartItems}
@@ -164,7 +161,6 @@ export default function MenuPage({ tableNumber, token, onOrderPlaced }) {
           onClose={() => setShowModal(false)}
         />
       )}
-
     </div>
   );
 }

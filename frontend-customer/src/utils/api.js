@@ -6,6 +6,8 @@ const api = axios.create({ baseURL: apiBaseURL.replace(/\/$/, '') });
 export const getMenu = (category) =>
   api.get('/menu', { params: category !== 'all' ? { category } : {} }).then((r) => r.data);
 
+export const getCategories = () => api.get('/categories').then((r) => r.data);
+
 export const placeOrder = (data) => api.post('/orders', data).then((r) => r.data);
 
 export const createTableSession = (tableNumber) =>

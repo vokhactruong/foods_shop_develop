@@ -22,5 +22,10 @@ export const createMenuItem = (data) => api.post('/menu', data).then((r) => r.da
 export const updateMenuItem = (id, data) => api.put(`/menu/${id}`, data).then((r) => r.data);
 export const deleteMenuItem = (id) => api.delete(`/menu/${id}`).then((r) => r.data);
 
+export const getCategoriesAdmin = () => api.get('/categories/all').then((r) => r.data);
+export const createCategory = (data) => api.post('/categories', data).then((r) => r.data);
+export const updateCategory = (id, data) => api.put(`/categories/${id}`, data).then((r) => r.data);
+export const deleteCategory = (id) => api.delete(`/categories/${id}`).then((r) => r.data);
+
 export const getTables = () => api.get('/tables').then((r) => r.data);
 export const createTablesBulk = (count) => api.post('/tables/bulk', { count }).then((r) => r.data);

@@ -24,7 +24,7 @@ export default function LoginPage({ onLogin }) {
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16, padding: 32, width: '100%', maxWidth: 360 }}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ fontSize: 48, marginBottom: 8 }}>🍿</div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>Thạch Ngọc Quán</h1>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--primary)' }}>Phở Lợi Hương</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Đăng nhập để tiếp tục</p>
         </div>
 
